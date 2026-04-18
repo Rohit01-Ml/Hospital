@@ -1,0 +1,63 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>description</mat-icon> My Prescriptions</h1>
+      <p class="page-subtitle">View prescriptions issued by your doctors</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (prescriptions().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">description</mat-icon>
+      <h3>No Prescriptions Yet</h3>
+      <p>Your doctor will add prescriptions after your consultation.</p>
+    </div>
+  } @else {
+    <div class="cards-grid">
+      @for (rx of prescriptions(); track rx.id) {
+        <mat-card class="rx-card">
+          <mat-card-header>
+            <div mat-card-avatar class="rx-avatar"><mat-icon>description</mat-icon></div>
+            <mat-card-title>{{ rx.diagnosis }}</mat-card-title>
+            <mat-card-subtitle>Dr. {{ rx.doctor_name }} &bull; {{ rx.created_at | date:'mediumDate' }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="medicines-list">
+              @for (med of rx.medicines; track med.name) {
+                <div class="medicine-item">
+                  <div class="med-header">
+                    <mat-icon class="med-icon">medication</mat-icon>
+                    <strong>{{ med.name }}</strong>
+                    <span class="med-dosage">{{ med.dosage }}</span>
+                  </div>
+                  <div class="med-details">
+                    <span><mat-icon class="tiny-icon">schedule</mat-icon> {{ med.frequency }}</span>
+                    <span><mat-icon class="tiny-icon">date_range</mat-icon> {{ med.duration }}</span>
+                  </div>
+                  @if (med.instructions) {
+                    <div class="med-instructions"><mat-icon class="tiny-icon">info</mat-icon> {{ med.instructions }}</div>
+                  }
+                </div>
+              }
+            </div>
+            @if (rx.notes) {
+              <div class="notes-block"><mat-icon class="tiny-icon">notes</mat-icon> {{ rx.notes }}</div>
+            }
+            @if (rx.follow_up_date) {
+              <div class="followup-chip">
+                <mat-icon class="tiny-icon">event</mat-icon> Follow-up: {{ rx.follow_up_date | date:'mediumDate' }}
+              </div>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-stroked-button color="primary" (click)="printPrescription(rx)">
+              <mat-icon>print</mat-icon> Print / Download PDF
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

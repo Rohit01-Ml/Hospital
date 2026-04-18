@@ -1,0 +1,124 @@
+<div class="page-header">
+  <h2>Patients</h2>
+  <a routerLink="/receptionist/book" class="add-btn"><mat-icon>person_add</mat-icon> Register & Book</a>
+</div>
+
+<div class="search-row">
+  <div class="search-box">
+    <mat-icon>search</mat-icon>
+    <input type="text" placeholder="Search by name, email or phone..."
+           [ngModel]="search()"
+           (ngModelChange)="search.set($event)"
+           (keyup.enter)="load()"
+           class="search-input">
+  </div>
+  <button class="search-btn" (click)="load()"><mat-icon>search</mat-icon> Search</button>
+</div>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+} @else {
+  <div class="table-wrap">
+    <div class="table-head">
+      <span>Name</span><span>Email</span><span>Phone</span><span>Type</span><span></span>
+    </div>
+    @for (p of patients(); track p.id) {
+      <div class="table-row">
+        <div class="name-cell">
+          <div class="avatar">{{ p.name[0] }}</div>
+          <div>
+            <a class="patient-link" [routerLink]="['/receptionist/patients', p.id]">
+              <strong>{{ p.name }}</strong>
+            </a>
+            @if (p.age) { <small>Age {{ p.age }}</small> }
+          </div>
+        </div>
+        <span>{{ p.email?.includes('@hospital.local') ? '—' : (p.email || '—') }}</span>
+        <span>{{ p.phone || '—' }}</span>
+        <span>
+          @if (p.walk_in) { <span class="badge walkin">Walk-in</span> }
+          @else { <span class="badge registered">Registered</span> }
+        </span>
+        <span class="action-cell">
+          <a class="view-btn" [routerLink]="['/receptionist/patients', p.id]" title="View profile">
+            <mat-icon>visibility</mat-icon>
+          </a>
+          <button class="edit-btn" (click)="openEdit(p)" title="Quick edit"><mat-icon>edit</mat-icon></button>
+        </span>
+      </div>
+    }
+    @if (patients().length === 0) {
+      <div class="empty-row">
+        <mat-icon>search_off</mat-icon>
+        <p>No patients found</p>
+      </div>
+    }
+  </div>
+  <div class="count-info">{{ patients().length }} patient(s) found</div>
+}
+
+<!-- Edit Modal -->
+@if (editingPatient()) {
+  <div class="modal-overlay" (click)="closeEdit()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>edit</mat-icon> Edit Patient</h3>
+        <button class="close-btn" (click)="closeEdit()"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="editForm.name" class="field-input" placeholder="Full name">
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input type="tel" [(ngModel)]="editForm.phone" class="field-input" placeholder="+91 XXXXX XXXXX">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="editForm.email" class="field-input" placeholder="Email address">
+          </div>
+          <div class="field">
+            <label>Age</label>
+            <input type="number" [(ngModel)]="editForm.age" class="field-input" min="0" max="120">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select [(ngModel)]="editForm.gender" class="field-input">
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Blood Group</label>
+            <select [(ngModel)]="editForm.blood_group" class="field-input">
+              <option value="">Select</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>Address</label>
+            <textarea [(ngModel)]="editForm.address" class="field-input" rows="2" placeholder="Address (optional)"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeEdit()" [disabled]="saving()">Cancel</button>
+        <button class="save-btn" (click)="saveEdit()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+          @else { <mat-icon>save</mat-icon> Save Changes }
+        </button>
+      </div>
+    </div>
+  </div>
+}

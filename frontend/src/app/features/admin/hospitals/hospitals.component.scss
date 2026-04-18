@@ -1,0 +1,195 @@
+.page-container { max-width: 1200px; margin: 0 auto; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a237e;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    mat-icon { font-size: 30px; width: 30px; height: 30px; }
+  }
+
+  .page-subtitle { margin: 0; font-size: 13px; color: #666; }
+}
+
+.form-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(26,35,126,.1) !important;
+  margin-bottom: 24px;
+  border-top: 4px solid #1a237e !important;
+  mat-card-title { color: #1a237e; }
+}
+
+.h-form { display: flex; flex-direction: column; gap: 0; padding-top: 8px; }
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  .flex-1 { flex: 1; min-width: 150px; }
+  .flex-2 { flex: 2; min-width: 200px; }
+}
+
+.full-width { width: 100%; }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  margin-top: 8px;
+}
+
+// Plans chips row
+.plans-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.plan-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 2px solid;
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  flex: 1;
+  min-width: 180px;
+
+  mat-icon { font-size: 28px; width: 28px; height: 28px; }
+
+  .plan-name { font-size: 14px; font-weight: 700; }
+  .plan-price { font-size: 12px; color: #888; }
+
+  .plan-features {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    span { font-size: 11px; color: #666; background: #f5f5f5; border-radius: 4px; padding: 2px 6px; }
+  }
+}
+
+// Hospitals Grid
+.hospitals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.hospital-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07) !important;
+  transition: transform .2s, box-shadow .2s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.11) !important;
+  }
+}
+
+.h-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  .h-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1a237e, #3949ab);
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .h-info {
+    flex: 1;
+    .h-name { font-size: 16px; font-weight: 700; color: #212121; }
+    .h-subdomain { font-size: 12px; color: #888; margin-top: 2px; }
+  }
+
+  .plan-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+}
+
+.divider { margin: 12px 0 !important; }
+
+.h-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.h-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+
+  .d-icon { font-size: 16px; width: 16px; height: 16px; color: #888; }
+}
+
+.features-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .feat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    background: #e8eaf6;
+    color: #3949ab;
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-weight: 600;
+    .tiny-icon { font-size: 13px; width: 13px; height: 13px; }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: #aaa;
+  .empty-icon { font-size: 64px; width: 64px; height: 64px; opacity: .3; }
+  h3 { margin: 14px 0 6px; font-size: 20px; }
+  p { margin: 0; font-size: 14px; }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 64px;
+}

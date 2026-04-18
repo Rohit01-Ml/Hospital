@@ -1,0 +1,190 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>queue</mat-icon> Live Queue</h1>
+      <p class="page-subtitle">
+        <span class="ws-dot" [class.connected]="wsStatus() === 'connected'"></span>
+        {{ wsStatus() === 'connected' ? 'Live — auto-updating' : wsStatus() === 'connecting' ? 'Connecting...' : 'Disconnected — retrying...' }}
+      </p>
+    </div>
+    <button mat-stroked-button (click)="loadQueue()"><mat-icon>refresh</mat-icon> Refresh</button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (queue()) {
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+      <div class="s-item blue">  <mat-icon>people</mat-icon>          <span>{{ queue()?.total_patients }}</span><label>Total</label></div>
+      <div class="s-item orange"><mat-icon>hourglass_empty</mat-icon> <span>{{ queue()?.waiting }}</span>        <label>Waiting</label></div>
+      <div class="s-item purple"><mat-icon>medical_services</mat-icon><span>{{ queue()?.in_progress }}</span>   <label>In Progress</label></div>
+      <div class="s-item green"> <mat-icon>check_circle</mat-icon>    <span>{{ queue()?.completed }}</span>     <label>Done</label></div>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-fill" [style.width.%]="progressPct"></div></div>
+    <div class="progress-label">{{ progressPct }}% complete</div>
+
+    <!-- Main split layout -->
+    <div class="split-layout" [class.panel-open]="prescribeApt()">
+
+      <!-- ── Queue Cards ── -->
+      <div class="queue-col">
+        <h3 class="col-title">Today's Patients</h3>
+
+        @for (apt of queue()?.appointments || []; track apt.id) {
+          <div class="patient-card"
+            [class.card-waiting]="apt.status === 'waiting'"
+            [class.card-progress]="apt.status === 'in_progress'"
+            [class.card-done]="apt.status === 'completed' || apt.status === 'skipped'"
+            [class.card-selected]="prescribeApt()?.id === apt.id">
+
+            <!-- Top row: token + name + status badge -->
+            <div class="card-top">
+              <div class="token" [class.t-waiting]="apt.status === 'waiting'"
+                                 [class.t-progress]="apt.status === 'in_progress'"
+                                 [class.t-done]="apt.status === 'completed'"
+                                 [class.t-skip]="apt.status === 'skipped'">
+                #{{ apt.token_number }}
+              </div>
+              <div class="card-info">
+                <div class="c-name">{{ apt.patient?.name || 'Patient' }}</div>
+                <div class="c-meta">{{ apt.time_slot }} &bull; {{ apt.specialization?.name }}</div>
+                @if (apt.notes) { <div class="c-notes">{{ apt.notes }}</div> }
+              </div>
+              <span class="status-badge"
+                [class.badge-waiting]="apt.status === 'waiting'"
+                [class.badge-progress]="apt.status === 'in_progress'"
+                [class.badge-done]="apt.status === 'completed'"
+                [class.badge-skip]="apt.status === 'skipped'">
+                {{ apt.status === 'in_progress' ? 'In Progress' : (apt.status | titlecase) }}
+              </span>
+            </div>
+
+            <!-- Action Buttons — own row, always visible -->
+            @if (apt.status === 'waiting') {
+              <div class="card-actions">
+                <button mat-raised-button color="primary" class="btn-start" (click)="start(apt)">
+                  <mat-icon>play_arrow</mat-icon> Start Consultation
+                </button>
+                <button mat-stroked-button color="warn" class="btn-skip" (click)="skip(apt)" matTooltip="Skip this patient">
+                  <mat-icon>skip_next</mat-icon> Skip
+                </button>
+              </div>
+            }
+
+            @if (apt.status === 'in_progress') {
+              <div class="card-actions">
+                <button mat-raised-button class="btn-prescribe" (click)="openPrescribe(apt)">
+                  <mat-icon>edit_note</mat-icon> Write Prescription & Complete
+                </button>
+                <button mat-stroked-button color="warn" class="btn-skip" (click)="skip(apt)" matTooltip="Skip this patient">
+                  <mat-icon>skip_next</mat-icon> Skip
+                </button>
+              </div>
+            }
+
+          </div>
+        }
+
+        @if (!queue()?.appointments?.length) {
+          <div class="empty-queue">
+            <mat-icon>event_available</mat-icon>
+            <p>No patients in today's queue</p>
+          </div>
+        }
+      </div>
+
+      <!-- ── Prescription Panel ── -->
+      @if (prescribeApt()) {
+        <div class="rx-panel">
+          <div class="rx-header">
+            <div class="rx-patient">
+              <div class="rx-avatar">{{ prescribeApt()!.patient?.name?.[0] || 'P' }}</div>
+              <div>
+                <div class="rx-name">{{ prescribeApt()!.patient?.name }}</div>
+                <div class="rx-meta">Token #{{ prescribeApt()!.token_number }} &bull; {{ prescribeApt()!.time_slot }}</div>
+              </div>
+            </div>
+            <button mat-icon-button (click)="closePrescribe()" matTooltip="Close">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <div class="rx-title"><mat-icon>description</mat-icon> Write Prescription</div>
+
+          <form [formGroup]="rxForm" (ngSubmit)="submitPrescription()" class="rx-form">
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Diagnosis / Chief Complaint *</mat-label>
+              <input matInput formControlName="diagnosis" placeholder="e.g. Stage 1 Hypertension">
+              <mat-icon matPrefix>local_hospital</mat-icon>
+            </mat-form-field>
+
+            <!-- Medicines -->
+            <div class="medicines-box">
+              <div class="med-bar">
+                <span class="med-label"><mat-icon>medication</mat-icon> Medicines</span>
+                <button mat-stroked-button type="button" (click)="addMedicine()">
+                  <mat-icon>add</mat-icon> Add Row
+                </button>
+              </div>
+
+              @for (med of medicines.controls; track $index) {
+                <div class="med-row" [formGroup]="$any(med)">
+                  <mat-form-field appearance="outline" class="f2">
+                    <mat-label>Medicine *</mat-label>
+                    <input matInput formControlName="name" placeholder="Amlodipine">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="f1">
+                    <mat-label>Dosage</mat-label>
+                    <input matInput formControlName="dosage" placeholder="5mg">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="f1">
+                    <mat-label>Frequency</mat-label>
+                    <input matInput formControlName="frequency" placeholder="Once daily">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="f1">
+                    <mat-label>Duration</mat-label>
+                    <input matInput formControlName="duration" placeholder="30 days">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="f2">
+                    <mat-label>Instructions</mat-label>
+                    <input matInput formControlName="instructions" placeholder="After meals">
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" type="button"
+                    (click)="removeMedicine($index)" [disabled]="medicines.length === 1">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="two-col">
+              <mat-form-field appearance="outline" class="f2">
+                <mat-label>Notes / Advice</mat-label>
+                <textarea matInput formControlName="notes" rows="3"
+                  placeholder="Reduce salt intake, rest, follow-up in 1 month..."></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="f1">
+                <mat-label>Follow-up Date</mat-label>
+                <input matInput type="date" formControlName="follow_up_date">
+              </mat-form-field>
+            </div>
+
+            <button mat-raised-button type="submit" class="submit-rx"
+              [disabled]="rxForm.invalid || saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner>&nbsp; Saving...
+              } @else {
+                <mat-icon>check_circle</mat-icon> Issue Prescription & Complete
+              }
+            </button>
+
+          </form>
+        </div>
+      }
+
+    </div><!-- end split-layout -->
+  }
+</div>

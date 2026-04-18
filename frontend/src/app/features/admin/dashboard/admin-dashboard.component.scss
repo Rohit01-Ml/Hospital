@@ -1,0 +1,45 @@
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem; margin-bottom: 2rem;
+}
+.stat-card {
+  text-decoration: none; cursor: pointer;
+  background: #fff; border-radius: var(--radius-md); padding: 1.25rem;
+  box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem;
+  border-left: 4px solid var(--c);
+  transition: box-shadow 0.2s, transform 0.2s;
+  &:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: color-mix(in srgb, var(--c) 12%, white);
+    display: flex; align-items: center; justify-content: center;
+    mat-icon { color: var(--c); }
+  }
+  .stat-val { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+  .stat-lbl { font-size: .78rem; color: var(--text-light); margin-top: .2rem; }
+}
+.quick-actions { margin-bottom: 2rem;
+  h3 { font-size: 1rem; font-weight: 600; font-family: 'Inter'; margin-bottom: 1rem; } }
+.action-grid { display: flex; gap: .75rem; flex-wrap: wrap; }
+.action-btn {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--primary); color: #fff; border-radius: var(--radius-sm);
+  padding: .65rem 1.25rem; text-decoration: none; font-weight: 600; font-size: .9rem;
+  transition: filter .2s, transform .2s;
+  &:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  &.accent { background: var(--accent); }
+  mat-icon { font-size: 1.2rem; }
+}
+.section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+  h3 { font-size: 1rem; font-weight: 600; font-family: 'Inter'; } }
+.table-card {
+  background: #fff; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden;
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--bg-light); }
+  th { padding: .85rem 1rem; text-align: left; font-size: .8rem; font-weight: 700;
+       color: var(--text-mid); text-transform: uppercase; letter-spacing: .5px; }
+  td { padding: .85rem 1rem; border-bottom: 1px solid var(--border); font-size: .88rem; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-light); }
+}
+.loading-center { display: flex; justify-content: center; padding: 3rem; }

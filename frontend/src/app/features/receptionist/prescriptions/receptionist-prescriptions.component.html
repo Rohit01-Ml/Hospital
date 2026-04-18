@@ -1,0 +1,281 @@
+<div class="page-header">
+  <div>
+    <h2><mat-icon>description</mat-icon> Prescriptions</h2>
+    <p>All prescriptions for your department's patients</p>
+  </div>
+  <button class="primary-btn" (click)="openAdd()"><mat-icon>add</mat-icon> New Prescription</button>
+</div>
+
+<!-- Search -->
+<div class="search-row">
+  <div class="search-box">
+    <mat-icon>search</mat-icon>
+    <input type="text" placeholder="Search by diagnosis, medicine or doctor..."
+           [ngModel]="search()" (ngModelChange)="search.set($event)"
+           (keyup.enter)="searchPrescriptions()" class="search-input">
+  </div>
+  <button class="search-btn" (click)="searchPrescriptions()"><mat-icon>search</mat-icon> Search</button>
+</div>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+} @else {
+  @if (prescriptions().length === 0) {
+    <div class="empty-state">
+      <mat-icon>description</mat-icon>
+      <h3>No prescriptions found</h3>
+      <p>Add the first prescription for a department patient</p>
+      <button class="primary-btn" (click)="openAdd()"><mat-icon>add</mat-icon> Add Prescription</button>
+    </div>
+  } @else {
+    <div class="count-info">{{ prescriptions().length }} prescription(s)</div>
+    <div class="presc-list">
+      @for (p of prescriptions(); track p.id) {
+        <div class="presc-card">
+          <div class="presc-main">
+            <!-- Patient -->
+            <div class="patient-col">
+              <div class="pat-avatar">{{ p.patient?.name?.[0] || '?' }}</div>
+              <div>
+                <a class="pat-name" [routerLink]="['/receptionist/patients', p.patient_id]">{{ p.patient?.name || 'Unknown' }}</a>
+                @if (p.patient?.age) { <small>Age {{ p.patient.age }}</small> }
+                @if (p.patient?.walk_in) { <span class="walkin-tag">Walk-in</span> }
+              </div>
+            </div>
+
+            <!-- Diagnosis -->
+            <div class="diag-col">
+              <div class="diag-title">{{ p.diagnosis }}</div>
+              <div class="doc-label">by {{ p.doctor_name }}</div>
+              <div class="date-label">{{ p.created_at | date:'d MMM yyyy' }}</div>
+            </div>
+
+            <!-- Medicines preview -->
+            <div class="med-col">
+              @for (m of p.medicines.slice(0,2); track m.name) {
+                <div class="med-chip"><mat-icon>medication</mat-icon>{{ m.name }} {{ m.dosage }}</div>
+              }
+              @if (p.medicines.length > 2) {
+                <div class="med-more">+{{ p.medicines.length - 2 }} more</div>
+              }
+            </div>
+
+            <!-- Follow-up -->
+            <div class="followup-col">
+              @if (p.follow_up_date) {
+                <span class="followup-chip"><mat-icon>event_repeat</mat-icon>{{ p.follow_up_date }}</span>
+              }
+            </div>
+
+            <!-- Actions -->
+            <div class="action-col">
+              <button class="icon-btn view" (click)="viewDetail(p)" title="View full prescription"><mat-icon>visibility</mat-icon></button>
+              <button class="icon-btn edit" (click)="openEdit(p)" title="Edit prescription"><mat-icon>edit</mat-icon></button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+
+<!-- ── Add / Edit Modal ───────────────────────────────────────────────────── -->
+@if (modal()) {
+  <div class="overlay" (click)="closeModal()">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>description</mat-icon> {{ editingId() ? 'Edit' : 'New' }} Prescription</h3>
+        <button class="close-btn" (click)="closeModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Patient search (only for new) -->
+        @if (!editingId()) {
+          <div class="field full" style="position:relative; margin-bottom:1rem">
+            <label>Patient <span class="req">*</span></label>
+            <div class="search-box" style="max-width:100%">
+              <mat-icon>person_search</mat-icon>
+              <input type="text" placeholder="Search patient by name, phone or email..."
+                     [ngModel]="patientSearch()" (ngModelChange)="patientSearch.set($event)"
+                     (input)="searchPatients()" class="search-input">
+            </div>
+            @if (patientResults().length > 0) {
+              <div class="patient-dropdown">
+                @for (pt of patientResults(); track pt.id) {
+                  <button class="patient-option" (click)="selectPatient(pt)">
+                    <div class="opt-avatar">{{ pt.name[0] }}</div>
+                    <div>
+                      <strong>{{ pt.name }}</strong>
+                      <span>{{ pt.phone || pt.email }}</span>
+                      @if (pt.walk_in) { <span class="walkin-tag">Walk-in</span> }
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+            @if (selectedPatient()) {
+              <div class="selected-patient">
+                <mat-icon>check_circle</mat-icon>
+                <strong>{{ selectedPatient().name }}</strong>
+                @if (selectedPatient().age) { <span>· Age {{ selectedPatient().age }}</span> }
+                <button class="clear-btn" (click)="selectedPatient.set(null); prescForm.patient_id=''; patientSearch.set('')">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="selected-patient" style="margin-bottom:1rem">
+            <mat-icon>person</mat-icon>
+            <strong>{{ selectedPatient()?.name }}</strong>
+          </div>
+        }
+
+        <!-- Diagnosis -->
+        <div class="field full" style="margin-bottom:1rem">
+          <label>Diagnosis <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="prescForm.diagnosis" class="field-input" placeholder="e.g., Viral Fever, Hypertension Stage 1">
+        </div>
+
+        <!-- Medicines -->
+        <div class="medicines-section">
+          <div class="section-label">
+            <mat-icon>medication</mat-icon> Medicines
+            <button class="add-med-btn" (click)="addMedicine()"><mat-icon>add</mat-icon> Add Medicine</button>
+          </div>
+
+          @for (med of prescForm.medicines; track med; let i = $index) {
+            <div class="med-form-row">
+              <div class="med-grid">
+                <div class="field">
+                  <label>Medicine Name <span class="req">*</span></label>
+                  <input type="text" [(ngModel)]="med.name" class="field-input" placeholder="Drug name">
+                </div>
+                <div class="field">
+                  <label>Dosage</label>
+                  <input type="text" [(ngModel)]="med.dosage" class="field-input" placeholder="e.g., 500mg">
+                </div>
+                <div class="field">
+                  <label>Frequency</label>
+                  <input type="text" [(ngModel)]="med.frequency" class="field-input" placeholder="e.g., Twice daily">
+                </div>
+                <div class="field">
+                  <label>Duration</label>
+                  <input type="text" [(ngModel)]="med.duration" class="field-input" placeholder="e.g., 7 days">
+                </div>
+                <div class="field full-4">
+                  <label>Instructions</label>
+                  <input type="text" [(ngModel)]="med.instructions" class="field-input" placeholder="e.g., After meals, with water">
+                </div>
+              </div>
+              @if (prescForm.medicines.length > 1) {
+                <button class="remove-btn" (click)="removeMedicine(i)" title="Remove"><mat-icon>delete</mat-icon></button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Notes & Follow-up -->
+        <div class="form-grid" style="margin-top:1rem">
+          <div class="field full">
+            <label>Notes / Instructions</label>
+            <textarea [(ngModel)]="prescForm.notes" class="field-input" rows="2"
+                      placeholder="Lifestyle advice, dietary restrictions, special instructions..."></textarea>
+          </div>
+          <div class="field">
+            <label>Follow-up Reminder</label>
+            <div class="followup-controls">
+              <div class="days-row">
+                <span class="days-lbl">In</span>
+                <input type="number" class="days-input" min="1" max="365" placeholder="days"
+                       [value]="followUpDays()"
+                       (input)="setFollowUpDays(+$any($event.target).value || null)">
+                <span class="days-lbl">days</span>
+              </div>
+              <div class="quick-days-row">
+                @for (d of [3,7,14,30]; track d) {
+                  <button type="button" class="quick-day-btn" [class.active]="followUpDays() === d"
+                          (click)="setFollowUpDays(d)">{{ d }}d</button>
+                }
+              </div>
+              @if (prescForm.follow_up_date) {
+                <div class="followup-set">
+                  <mat-icon>event_repeat</mat-icon>
+                  <span>{{ formatFollowUp(prescForm.follow_up_date) }}</span>
+                  <button type="button" class="clear-fu-btn" (click)="setFollowUpDays(null)"><mat-icon>close</mat-icon></button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeModal()" [disabled]="saving()">Cancel</button>
+        <button class="save-btn" (click)="save()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+          @else { <mat-icon>save</mat-icon> {{ editingId() ? 'Update' : 'Save Prescription' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── View Detail Modal ──────────────────────────────────────────────────── -->
+@if (viewing()) {
+  <div class="overlay" (click)="closeView()">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>description</mat-icon> Prescription Detail</h3>
+        <div style="display:flex;gap:.5rem">
+          <button class="icon-btn edit" (click)="openEdit(viewing()); closeView()" title="Edit"><mat-icon>edit</mat-icon></button>
+          <button class="close-btn" (click)="closeView()"><mat-icon>close</mat-icon></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="view-header">
+          <div class="view-patient">
+            <div class="pat-avatar lg">{{ viewing().patient?.name?.[0] || '?' }}</div>
+            <div>
+              <strong>{{ viewing().patient?.name }}</strong>
+              @if (viewing().patient?.age) { <span>Age {{ viewing().patient.age }}</span> }
+              @if (viewing().patient?.gender) { <span>· {{ viewing().patient.gender | titlecase }}</span> }
+            </div>
+          </div>
+          <div class="view-meta">
+            <div class="meta-item"><mat-icon>person</mat-icon> {{ viewing().doctor_name }}</div>
+            <div class="meta-item"><mat-icon>calendar_today</mat-icon> {{ viewing().created_at | date:'d MMM yyyy, h:mm a' }}</div>
+          </div>
+        </div>
+
+        <div class="view-diagnosis">
+          <label>Diagnosis</label>
+          <p>{{ viewing().diagnosis }}</p>
+        </div>
+
+        <div class="view-medicines">
+          <label>Medicines</label>
+          <div class="med-table">
+            <div class="med-head"><span>Medicine</span><span>Dosage</span><span>Frequency</span><span>Duration</span><span>Instructions</span></div>
+            @for (m of viewing().medicines; track m.name) {
+              <div class="med-row">
+                <span class="med-name">{{ m.name }}</span>
+                <span>{{ m.dosage }}</span>
+                <span>{{ m.frequency }}</span>
+                <span>{{ m.duration }}</span>
+                <span class="med-instr">{{ m.instructions || '—' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (viewing().notes) {
+          <div class="view-notes"><mat-icon>notes</mat-icon><p>{{ viewing().notes }}</p></div>
+        }
+        @if (viewing().follow_up_date) {
+          <div class="view-followup"><mat-icon>event_repeat</mat-icon><span>Follow-up on {{ viewing().follow_up_date }}</span></div>
+        }
+      </div>
+    </div>
+  </div>
+}

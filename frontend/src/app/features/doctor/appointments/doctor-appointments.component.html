@@ -1,0 +1,84 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>calendar_today</mat-icon> Appointments</h1>
+      <p class="page-subtitle">View and manage all your patient appointments</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else {
+    <mat-tab-group>
+      <mat-tab [label]="'Today (' + todayApts.length + ')'">
+        <ng-template matTabContent>
+          <div class="apts-list">
+            @for (apt of todayApts; track apt.id) {
+              <div class="apt-row">
+                <div class="token">#{{ apt.token_number }}</div>
+                <div class="apt-info">
+                  <div class="patient-name">{{ apt.patient?.name || 'Patient' }}</div>
+                  <div class="apt-meta">{{ apt.time_slot }} &bull; {{ apt.specialization?.name }}</div>
+                  @if (editingNotes() === apt.id) {
+                    <div class="notes-edit">
+                      <textarea [(ngModel)]="notesText" rows="2" class="notes-input" placeholder="Clinical notes..."></textarea>
+                      <div class="notes-btns">
+                        <button mat-flat-button color="primary" (click)="saveNotes(apt)">Save</button>
+                        <button mat-button (click)="editingNotes.set(null)">Cancel</button>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="notes-text">{{ apt.notes || 'No notes' }}
+                      <button mat-icon-button (click)="startEdit(apt)" title="Edit notes"><mat-icon class="tiny-icon">edit</mat-icon></button>
+                    </div>
+                  }
+                </div>
+                <div class="status-pill" [style.background-color]="statusColor(apt.status)">{{ apt.status | titlecase }}</div>
+              </div>
+            }
+            @if (todayApts.length === 0) {
+              <div class="empty">No appointments today.</div>
+            }
+          </div>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab [label]="'Upcoming (' + upcoming.length + ')'">
+        <ng-template matTabContent>
+          <div class="apts-list">
+            @for (apt of upcoming; track apt.id) {
+              <div class="apt-row">
+                <div class="token">#{{ apt.token_number }}</div>
+                <div class="apt-info">
+                  <div class="patient-name">{{ apt.patient?.name || 'Patient' }}</div>
+                  <div class="apt-meta">{{ apt.date }} &bull; {{ apt.time_slot }}</div>
+                </div>
+                <div class="status-pill" [style.background-color]="statusColor(apt.status)">{{ apt.status | titlecase }}</div>
+              </div>
+            }
+            @if (upcoming.length === 0) { <div class="empty">No upcoming appointments.</div> }
+          </div>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab [label]="'Past (' + pastApts.length + ')'">
+        <ng-template matTabContent>
+          <div class="apts-list">
+            @for (apt of pastApts; track apt.id) {
+              <div class="apt-row">
+                <div class="token past">#{{ apt.token_number }}</div>
+                <div class="apt-info">
+                  <div class="patient-name">{{ apt.patient?.name || 'Patient' }}</div>
+                  <div class="apt-meta">{{ apt.date }} &bull; {{ apt.time_slot }}</div>
+                  @if (apt.notes) { <div class="notes-text">{{ apt.notes }}</div> }
+                </div>
+                <div class="status-pill" [style.background-color]="statusColor(apt.status)">{{ apt.status | titlecase }}</div>
+              </div>
+            }
+            @if (pastApts.length === 0) { <div class="empty">No past appointments.</div> }
+          </div>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

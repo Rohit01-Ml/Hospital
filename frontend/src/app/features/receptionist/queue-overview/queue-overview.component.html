@@ -1,0 +1,183 @@
+<div class="page-header">
+  <div>
+    <h2>Live Queue Management</h2>
+    <p>Your department's queues · click a card to expand &amp; manage</p>
+  </div>
+  <div class="refresh-info">
+    <mat-icon>refresh</mat-icon>
+    <span>Refresh in {{ countdown() }}s</span>
+    @if (lastUpdated()) { <small>Updated {{ lastUpdated() }}</small> }
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+} @else {
+  @if (queues().length === 0) {
+    <div class="empty-state">
+      <mat-icon>event_busy</mat-icon>
+      <p>No appointments today in your department</p>
+    </div>
+  }
+
+  @for (doc of queues(); track doc.doctor_id) {
+    <div class="doctor-panel"
+         [class.expanded]="expandedDoc() === doc.doctor_id"
+         [class.active]="doc.in_progress > 0"
+         [class.has-priority]="doc.priority_count > 0">
+
+      <!-- ── Header ─────────────────────────────────────────── -->
+      <div class="panel-header" (click)="toggleExpand(doc.doctor_id)">
+
+        <div class="doc-identity">
+          <div class="doc-avatar">{{ doc.doctor_name[0] }}</div>
+          <div class="doc-meta">
+            <div class="doc-name">{{ doc.doctor_name }}</div>
+            <div class="doc-spec">{{ doc.specialization }}</div>
+          </div>
+          @if (doc.in_progress > 0) { <div class="live-dot"></div> }
+          @if (doc.priority_count > 0) {
+            <span class="prio-badge"><mat-icon>bolt</mat-icon>{{ doc.priority_count }} priority</span>
+          }
+        </div>
+
+        <div class="summary-chips">
+          <span class="chip wait">{{ doc.waiting }} waiting</span>
+          <span class="chip prog">{{ doc.in_progress }} consulting</span>
+          <span class="chip done">{{ doc.completed }} done</span>
+        </div>
+
+        <div class="current-token-box">
+          <span class="ct-lbl">Now Serving</span>
+          <span class="ct-num">#{{ doc.current_token || '—' }}</span>
+        </div>
+
+        <div class="panel-actions" (click)="$event.stopPropagation()">
+          <button class="next-btn"
+                  [disabled]="isActing('next_' + doc.doctor_id) || doc.waiting === 0"
+                  (click)="callNext(doc.doctor_id)">
+            @if (isActing('next_' + doc.doctor_id)) {
+              <mat-spinner diameter="16"></mat-spinner>
+            } @else {
+              <mat-icon>skip_next</mat-icon>
+            }
+            @if (doc.priority_count > 0) { Call Next ⚡ } @else { Call Next }
+          </button>
+        </div>
+
+        <mat-icon class="expand-icon">{{ expandedDoc() === doc.doctor_id ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </div>
+
+      <!-- ── Progress Bar ──────────────────────────────────── -->
+      @if (doc.total > 0) {
+        <div class="progress-strip">
+          <div class="progress-fill" [style.width.%]="(doc.completed / doc.total) * 100"></div>
+        </div>
+      }
+
+      <!-- ── Expanded Queue ────────────────────────────────── -->
+      @if (expandedDoc() === doc.doctor_id) {
+        <div class="queue-body">
+          @if (isActing('loading_' + doc.doctor_id)) {
+            <div class="inner-loading"><mat-spinner diameter="32"></mat-spinner></div>
+          } @else if (docQueue(doc.doctor_id)) {
+            @if (docQueue(doc.doctor_id).appointments.length === 0) {
+              <div class="no-apts"><mat-icon>inbox</mat-icon> No appointments today</div>
+            } @else {
+              <!-- Legend -->
+              <div class="legend-row">
+                <span class="legend-item"><span class="leg prio"></span> Priority patient</span>
+                <span class="legend-item"><span class="leg prog"></span> Consulting</span>
+                <span class="legend-item"><span class="leg wait"></span> Waiting</span>
+              </div>
+
+              <div class="apt-list">
+                @for (apt of docQueue(doc.doctor_id).appointments; track apt.id) {
+                  <div class="apt-row"
+                       [class.apt-priority]="apt.priority && apt.status === 'waiting'"
+                       [class.apt-progress]="apt.status === 'in_progress'"
+                       [class.apt-done]="apt.status === 'completed'"
+                       [class.apt-cancelled]="apt.status === 'cancelled'">
+
+                    <!-- Token -->
+                    <div class="token-col">
+                      <div class="token-num" [class.token-priority]="apt.priority">#{{ apt.token_number }}</div>
+                      @if (apt.priority && apt.status === 'waiting') {
+                        <div class="prio-tag"><mat-icon>bolt</mat-icon>PRIORITY</div>
+                      }
+                    </div>
+
+                    <!-- Patient info -->
+                    <div class="pat-info">
+                      <strong>{{ apt.patient?.name || 'Unknown' }}</strong>
+                      <span class="pat-sub">
+                        @if (apt.patient?.age) { Age {{ apt.patient.age }} · }
+                        {{ apt.time_slot }}
+                      </span>
+                      @if (apt.notes) { <small class="notes-txt">{{ apt.notes }}</small> }
+                    </div>
+
+                    <!-- Wait info (only for waiting patients) -->
+                    @if (apt.status === 'waiting') {
+                      <div class="wait-info">
+                        <span class="ahead-badge">
+                          <mat-icon>people</mat-icon>{{ apt.patients_ahead }} ahead
+                        </span>
+                        <span class="est-time">
+                          <mat-icon>schedule</mat-icon>~{{ formatWait(apt.estimated_wait_minutes) }}
+                        </span>
+                      </div>
+                    }
+
+                    <!-- Status badge -->
+                    <div class="status-badge" [class]="'s-' + statusColor(apt.status)">
+                      {{ statusLabel(apt.status) }}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="row-actions">
+                      @if (isActing(apt.id) || isActing('prio_' + apt.id)) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                      } @else {
+                        @if (apt.status === 'waiting') {
+                          <!-- Priority toggle -->
+                          <button class="icon-btn"
+                                  [class.prio-on]="apt.priority"
+                                  [title]="apt.priority ? 'Remove priority' : 'Mark as priority'"
+                                  (click)="togglePriority(apt, doc.doctor_id)">
+                            <mat-icon>bolt</mat-icon>
+                          </button>
+                          <!-- Start consulting -->
+                          <button class="act-btn consult" (click)="setStatus(apt.id, 'in_progress', doc.doctor_id)">
+                            <mat-icon>play_arrow</mat-icon> Consult
+                          </button>
+                          <!-- Cancel -->
+                          <button class="icon-btn danger" title="Cancel appointment"
+                                  (click)="setStatus(apt.id, 'cancelled', doc.doctor_id)">
+                            <mat-icon>cancel</mat-icon>
+                          </button>
+                        }
+                        @if (apt.status === 'in_progress') {
+                          <button class="act-btn done-btn" (click)="setStatus(apt.id, 'completed', doc.doctor_id)">
+                            <mat-icon>check_circle</mat-icon> Done
+                          </button>
+                          <button class="icon-btn" title="Move back to waiting"
+                                  (click)="setStatus(apt.id, 'waiting', doc.doctor_id)">
+                            <mat-icon>undo</mat-icon>
+                          </button>
+                        }
+                        @if (apt.status === 'completed') {
+                          <span class="done-lbl"><mat-icon>check</mat-icon> Done</span>
+                        }
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+}

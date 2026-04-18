@@ -1,0 +1,267 @@
+<div class="page-header">
+  <div>
+    <h2>Book Walk-in Appointment</h2>
+    @if (department()) {
+      <p class="dept-tag"><mat-icon>local_hospital</mat-icon> {{ department()?.name }} Department · Fee: ₹{{ fee() }}</p>
+    }
+  </div>
+</div>
+
+<!-- Steps bar -->
+@if (step() < 4) {
+  <div class="steps-bar">
+    @for (s of ['Patient','Doctor','Date & Time','Payment']; track s; let i = $index) {
+      <div class="step-item" [class.active]="i === step()" [class.done]="i < step()">
+        <div class="step-num">
+          @if (i < step()) { <mat-icon>check</mat-icon> }
+          @else { {{ i + 1 }} }
+        </div>
+        <span class="step-label">{{ s }}</span>
+      </div>
+      @if (i < 3) { <div class="step-line" [class.done]="i < step()"></div> }
+    }
+  </div>
+}
+
+@if (loading() && step() < 4) {
+  <div class="loading-center"><mat-spinner diameter="44"></mat-spinner></div>
+}
+
+<!-- ── Step 0: Patient ─────────────────────────────────────────────────────────── -->
+@if (step() === 0 && !loading()) {
+  <div class="step-content">
+    <h3>Find or Register Patient</h3>
+
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Search department patients by name, email or phone..."
+             [ngModel]="patientSearch()"
+             (ngModelChange)="patientSearch.set($event)"
+             (input)="searchPatients()"
+             class="search-input">
+    </div>
+
+    @if (patientResults().length > 0) {
+      <div class="patient-list">
+        @for (p of patientResults(); track p.id) {
+          <button class="patient-row" (click)="selectExistingPatient(p)">
+            <div class="pat-avatar">{{ p.name[0] }}</div>
+            <div class="pat-info">
+              <strong>{{ p.name }}</strong>
+              <span>{{ p.email }}</span>
+              @if (p.phone) { <span>{{ p.phone }}</span> }
+              @if (p.age) { <span>Age: {{ p.age }}</span> }
+              @if (p.walk_in) { <span class="walkin-badge">Walk-in</span> }
+            </div>
+            <mat-icon class="arrow">arrow_forward_ios</mat-icon>
+          </button>
+        }
+      </div>
+    }
+
+    <div class="divider"><span>OR register new walk-in patient</span></div>
+
+    <div class="new-patient-form">
+      <h4><mat-icon>person_add</mat-icon> New Patient Details</h4>
+      <div class="form-grid">
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="newPatient.name" placeholder="Enter full name" class="field-input">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" [(ngModel)]="newPatient.phone" placeholder="+91 XXXXX XXXXX" class="field-input">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="newPatient.email" placeholder="Optional" class="field-input">
+        </div>
+        <div class="field">
+          <label>Age</label>
+          <input type="number" [(ngModel)]="newPatient.age" placeholder="Age" class="field-input" min="0" max="120">
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select [(ngModel)]="newPatient.gender" class="field-input">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="primary-btn" (click)="useNewPatient()" [disabled]="!newPatient.name.trim()">
+        <mat-icon>arrow_forward</mat-icon> Continue with New Patient
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ── Step 1: Doctor ─────────────────────────────────────────────────────────── -->
+@if (step() === 1 && !loading()) {
+  <div class="step-content">
+    <div class="context-bar">
+      <div class="ctx-item"><mat-icon>person</mat-icon> {{ patientDisplayName() }}</div>
+      <div class="ctx-sep">›</div>
+      <div class="ctx-item"><mat-icon>local_hospital</mat-icon> {{ department()?.name }}</div>
+    </div>
+
+    <h3>Choose Doctor</h3>
+    <div class="doc-list">
+      @for (doc of deptDoctors(); track doc.id) {
+        <button class="doc-card" [class.selected]="selectedDoctor()?.id === doc.id" (click)="selectDoctor(doc)">
+          <div class="doc-avatar">{{ doc.name[0] }}</div>
+          <div class="doc-info">
+            <strong>{{ doc.name }}</strong>
+            <span>{{ doc.qualification }}</span>
+            <span>{{ doc.experience_years }} yrs experience</span>
+          </div>
+          <div class="doc-rating"><mat-icon>star</mat-icon> {{ doc.rating }}</div>
+        </button>
+      }
+      @if (deptDoctors().length === 0) {
+        <p class="no-slots">No doctors found in your department.</p>
+      }
+    </div>
+    <button class="back-btn" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
+  </div>
+}
+
+<!-- ── Step 2: Date & Time ─────────────────────────────────────────────────────── -->
+@if (step() === 2 && !loading()) {
+  <div class="step-content">
+    <div class="context-bar">
+      <div class="ctx-item"><mat-icon>person</mat-icon> {{ patientDisplayName() }}</div>
+      <div class="ctx-sep">›</div>
+      <div class="ctx-item"><mat-icon>medical_services</mat-icon> {{ selectedDoctor()?.name }}</div>
+    </div>
+
+    <h3>Choose Date & Time</h3>
+    <div class="date-section">
+      <label class="field-label"><mat-icon>calendar_today</mat-icon> Appointment Date</label>
+      <input type="date" [min]="minDate" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)" class="date-input">
+    </div>
+
+    @if (selectedDate() && slots().length > 0) {
+      <div class="slots-wrap">
+        <p class="slots-label">Available Slots</p>
+        <div class="slots-grid">
+          @for (slot of slots(); track slot.time) {
+            <button class="slot-btn" [class.selected]="selectedSlot() === slot.time"
+                    [disabled]="!slot.available" (click)="selectSlot(slot.time)">
+              {{ slot.time }}
+              @if (!slot.available) { <span class="booked-lbl">Booked</span> }
+            </button>
+          }
+        </div>
+      </div>
+    }
+    @if (selectedDate() && slots().length === 0) {
+      <p class="no-slots">No available slots on this day. Try another date.</p>
+    }
+
+    <div class="row-actions">
+      <button class="back-btn" (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
+      <button class="primary-btn" [disabled]="!selectedSlot()" (click)="step.set(3)">
+        Continue <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ── Step 3: Review & Payment ────────────────────────────────────────────────── -->
+@if (step() === 3 && !loading()) {
+  <div class="step-content">
+    <h3>Review & Collect Payment</h3>
+
+    <div class="review-card">
+      <div class="review-row"><mat-icon>person</mat-icon><div><label>Patient</label><span>{{ patientDisplayName() }}</span></div></div>
+      <div class="review-row"><mat-icon>local_hospital</mat-icon><div><label>Department</label><span>{{ department()?.name }}</span></div></div>
+      <div class="review-row"><mat-icon>medical_services</mat-icon><div><label>Doctor</label><span>{{ selectedDoctor()?.name }}</span><small>{{ selectedDoctor()?.qualification }}</small></div></div>
+      <div class="review-row"><mat-icon>calendar_today</mat-icon><div><label>Date</label><span>{{ selectedDate() }}</span></div></div>
+      <div class="review-row"><mat-icon>schedule</mat-icon><div><label>Time</label><span>{{ selectedSlot() }}</span></div></div>
+      <div class="notes-section">
+        <label>Notes (optional)</label>
+        <textarea rows="2" placeholder="Any relevant notes..." [ngModel]="notes()" (ngModelChange)="notes.set($event)" class="notes-input"></textarea>
+      </div>
+    </div>
+
+    <div class="payment-section">
+      <h4>Collect Payment</h4>
+      <div class="fee-row">
+        <span>{{ department()?.name }} Consultation Fee</span>
+        <strong class="fee-val">₹{{ fee() }}</strong>
+      </div>
+
+      <div class="method-tabs">
+        <button class="method-tab" [class.active]="paymentMethod() === 'cash'" (click)="paymentMethod.set('cash')">
+          <mat-icon>payments</mat-icon> Cash
+        </button>
+        <button class="method-tab" [class.active]="paymentMethod() === 'upi'" (click)="paymentMethod.set('upi')">
+          <mat-icon>qr_code</mat-icon> UPI
+        </button>
+        <button class="method-tab" [class.active]="paymentMethod() === 'online'" (click)="paymentMethod.set('online')">
+          <mat-icon>credit_card</mat-icon> Card/Online
+        </button>
+      </div>
+
+      @if (paymentMethod() === 'cash') {
+        <div class="method-detail cash-detail">
+          <mat-icon>payments</mat-icon>
+          <div><strong>Collect ₹{{ fee() }} in Cash</strong><p>Receive payment from patient before confirming.</p></div>
+        </div>
+      }
+      @if (paymentMethod() === 'upi') {
+        <div class="method-detail upi-detail">
+          <mat-icon>qr_code</mat-icon>
+          <div><strong>UPI: {{ UPI_ID }}</strong><p>Ask patient to transfer ₹{{ fee() }} and confirm receipt.</p></div>
+        </div>
+      }
+      @if (paymentMethod() === 'online') {
+        <div class="method-detail online-detail">
+          <mat-icon>credit_card</mat-icon>
+          <div><strong>Card / Net Banking</strong><p>Payment marked as pending — collect separately.</p></div>
+        </div>
+      }
+    </div>
+
+    <div class="row-actions">
+      <button class="back-btn" (click)="goBack()" [disabled]="loading()"><mat-icon>arrow_back</mat-icon> Back</button>
+      <button class="confirm-btn" (click)="confirm()" [disabled]="loading()">
+        @if (loading()) { <mat-spinner diameter="20"></mat-spinner> }
+        @else { <mat-icon>check_circle</mat-icon> Confirm Booking & Payment }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ── Step 4: Success ─────────────────────────────────────────────────────────── -->
+@if (step() === 4 && bookingResult()) {
+  <div class="success-screen">
+    <div class="success-icon"><mat-icon>check_circle</mat-icon></div>
+    <h2>Appointment Confirmed!</h2>
+    <p class="success-sub">{{ department()?.name }} Department · Token issued successfully.</p>
+
+    <div class="token-display">
+      <div class="token-label">Token Number</div>
+      <div class="token-number">#{{ bookingResult()?.token_number }}</div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-row"><span>Patient</span><strong>{{ bookingResult()?.patient?.name }}</strong></div>
+      <div class="result-row"><span>Doctor</span><strong>{{ bookingResult()?.appointment?.doctor?.name }}</strong></div>
+      <div class="result-row"><span>Date</span><strong>{{ bookingResult()?.appointment?.date }}</strong></div>
+      <div class="result-row"><span>Time</span><strong>{{ bookingResult()?.appointment?.time_slot }}</strong></div>
+      <div class="result-row"><span>Amount</span><strong>₹{{ bookingResult()?.payment?.amount }}</strong></div>
+      <div class="result-row">
+        <span>Payment</span>
+        <strong class="paid-badge">✓ {{ (bookingResult()?.payment?.method || '').toUpperCase() }} RECEIVED</strong>
+      </div>
+    </div>
+
+    <div class="success-actions">
+      <button class="print-btn" (click)="printToken()"><mat-icon>print</mat-icon> Print Token</button>
+      <button class="new-btn" (click)="reset()"><mat-icon>add_circle</mat-icon> Book Another</button>
+    </div>
+  </div>
+}

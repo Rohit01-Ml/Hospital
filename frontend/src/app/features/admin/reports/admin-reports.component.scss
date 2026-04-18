@@ -1,0 +1,19 @@
+.page-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: #1565c0; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.page-title mat-icon { font-size: 2rem; height: 2rem; width: 2rem; }
+.page-subtitle { color: #666; margin: 0; }
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+.form-card { border-radius: 12px; margin-bottom: 24px; }
+.report-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: flex; gap: 16px; }
+.flex-1 { flex: 1; } .flex-2 { flex: 2; }
+.full-width { width: 100%; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+.report-card { border-radius: 12px; border-left: 4px solid; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.rep-avatar { display: flex; align-items: center; justify-content: center; }
+.status-badge { display: inline-block; padding: 3px 12px; border-radius: 12px; color: white; font-size: 0.82rem; font-weight: 600; margin-bottom: 10px; }
+.findings { font-size: 0.88rem; color: #555; margin: 0; line-height: 1.4; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; color: #aaa; text-align: center; }
+.empty-icon { font-size: 5rem; height: 5rem; width: 5rem; color: #ddd; margin-bottom: 16px; }

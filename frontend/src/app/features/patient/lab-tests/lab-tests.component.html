@@ -1,0 +1,115 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>biotech</mat-icon> Lab Tests</h1>
+      <p class="page-subtitle">Book and track your laboratory tests</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="showForm.set(!showForm())">
+      <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
+      {{ showForm() ? 'Cancel' : 'Book New Test' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Book a Lab Test</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="book()" class="book-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Test</mat-label>
+            <mat-select formControlName="test_type_id">
+              @for (t of testTypes(); track t.id) {
+                <mat-option [value]="t.id">
+                  {{ t.name }} — ₹{{ t.price }} ({{ t.turnaround_hours }}h turnaround)
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notes (optional)</mat-label>
+            <textarea matInput formControlName="notes" rows="2"></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || booking()">
+            @if (booking()) { <mat-spinner diameter="20"></mat-spinner> }
+            @else { <mat-icon>biotech</mat-icon> Book Test }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else {
+    <mat-tab-group class="tabs">
+      <mat-tab label="My Bookings">
+        @if (bookings().length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">biotech</mat-icon>
+            <h3>No Lab Tests Booked</h3>
+            <p>Book a lab test to get started.</p>
+          </div>
+        } @else {
+          <div class="cards-grid">
+            @for (b of bookings(); track b.id) {
+              <mat-card class="booking-card">
+                <mat-card-header>
+                  <div mat-card-avatar class="lab-avatar"><mat-icon>science</mat-icon></div>
+                  <mat-card-title>{{ b.test_type?.name || getType(b.test_type_id)?.name || 'Lab Test' }}</mat-card-title>
+                  <mat-card-subtitle>Booked {{ b.booked_at | date:'mediumDate' }}</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="status-row">
+                    <mat-chip [color]="statusColor(b.status)" highlighted>{{ b.status | titlecase }}</mat-chip>
+                    <mat-chip [color]="b.payment_status === 'paid' ? 'primary' : 'warn'" highlighted>
+                      {{ b.payment_status | titlecase }}
+                    </mat-chip>
+                  </div>
+                  <div class="amount-row">
+                    <mat-icon class="tiny-icon">currency_rupee</mat-icon> ₹{{ b.amount }}
+                  </div>
+                  @if (b.notes) {
+                    <p class="notes-text">{{ b.notes }}</p>
+                  }
+                </mat-card-content>
+                @if (b.status === 'pending') {
+                  <mat-card-actions>
+                    <button mat-stroked-button color="warn" (click)="cancel(b.id)">
+                      <mat-icon>cancel</mat-icon> Cancel
+                    </button>
+                  </mat-card-actions>
+                }
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-tab>
+
+      <mat-tab label="Available Tests">
+        <div class="test-types-grid">
+          @for (t of testTypes(); track t.id) {
+            <mat-card class="type-card">
+              <mat-card-header>
+                <div mat-card-avatar class="type-avatar"><mat-icon>biotech</mat-icon></div>
+                <mat-card-title>{{ t.name }}</mat-card-title>
+                <mat-card-subtitle>{{ t.category }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>{{ t.description }}</p>
+                <div class="type-meta">
+                  <span><mat-icon class="tiny-icon">currency_rupee</mat-icon> ₹{{ t.price }}</span>
+                  <span><mat-icon class="tiny-icon">schedule</mat-icon> {{ t.turnaround_hours }}h results</span>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" (click)="form.patchValue({test_type_id: t.id}); showForm.set(true)">
+                  Book This Test
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

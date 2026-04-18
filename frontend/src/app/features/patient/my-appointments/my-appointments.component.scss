@@ -1,0 +1,34 @@
+.tab-content { padding: 1.5rem 0; }
+.apt-row {
+  display: flex; gap: 1.25rem; align-items: flex-start;
+  background: #fff; border-radius: var(--radius-md); padding: 1.25rem;
+  margin-bottom: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+  transition: box-shadow .2s;
+  &:hover { box-shadow: var(--shadow-md); }
+  &.past { opacity: .85; }
+  @media(max-width: 700px) { flex-direction: column; }
+}
+.token-col { display: flex; flex-direction: column; align-items: center; gap: .4rem; min-width: 68px; }
+.token {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem;
+  &.muted { background: var(--border); color: var(--text-light); }
+}
+.apt-details { flex: 1; }
+.apt-title { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+.apt-meta-row {
+  display: flex; flex-wrap: wrap; gap: .75rem; font-size: .8rem; color: var(--text-mid);
+  span { display: flex; align-items: center; gap: .25rem; }
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
+}
+.apt-notes { font-size: .82rem; color: var(--text-light); margin-top: .5rem; font-style: italic; }
+.apt-actions { display: flex; flex-direction: column; gap: .5rem; align-items: flex-end;
+  button, a { display: flex; align-items: center; gap: .3rem; white-space: nowrap; } }
+.loading-center { display: flex; justify-content: center; padding: 3rem; }
+.empty-state {
+  text-align: center; padding: 3rem;
+  mat-icon { font-size: 3.5rem; width: 3.5rem; height: 3.5rem; color: var(--border); display: block; margin: 0 auto 1rem; }
+  h3 { margin-bottom: 1rem; color: var(--text-mid); }
+}

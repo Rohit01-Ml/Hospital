@@ -1,0 +1,74 @@
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="logo">
+        <span class="material-icons">local_hospital</span>
+        <span>MediCare<strong>+</strong></span>
+      </div>
+      <h1>Join MediCare+</h1>
+      <p>Create your free account and start managing your health appointments effortlessly.</p>
+      <div class="auth-features">
+        <div class="af-item"><span class="material-icons">check_circle</span> Free for patients</div>
+        <div class="af-item"><span class="material-icons">check_circle</span> Instant account activation</div>
+        <div class="af-item"><span class="material-icons">check_circle</span> Book your first appointment today</div>
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p class="auth-sub">Already have an account? <a routerLink="/login">Sign in</a></p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="name" placeholder="John Smith">
+          <mat-icon matPrefix>person</mat-icon>
+          @if (form.get('name')?.hasError('minlength')) {
+            <mat-error>Minimum 2 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="you@example.com">
+          <mat-icon matPrefix>email</mat-icon>
+          @if (form.get('email')?.hasError('email')) {
+            <mat-error>Enter a valid email</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" [type]="hidePass() ? 'password' : 'text'">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button mat-icon-button matSuffix type="button" (click)="hidePass.set(!hidePass())">
+            <mat-icon>{{ hidePass() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (form.get('password')?.hasError('minlength')) {
+            <mat-error>Minimum 6 characters</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Account Type</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="patient">Patient</mat-option>
+            <mat-option value="admin">Admin</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>badge</mat-icon>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="submit-btn" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Create Account
+          }
+        </button>
+      </form>
+
+      <p class="terms">By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+  </div>
+</div>

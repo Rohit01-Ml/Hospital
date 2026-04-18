@@ -1,0 +1,104 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>campaign</mat-icon> Notifications</h1>
+      <p class="page-subtitle">Send and manage system notifications</p>
+    </div>
+  </div>
+
+  <div class="tools-grid">
+    <!-- Broadcast -->
+    <mat-card class="tool-card">
+      <mat-card-header>
+        <div mat-card-avatar class="broadcast-avatar"><mat-icon>broadcast_on_personal</mat-icon></div>
+        <mat-card-title>Broadcast to All</mat-card-title>
+        <mat-card-subtitle>Send a notification to all patients</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="broadcastForm" (ngSubmit)="broadcast()" class="notif-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              @for (t of notifTypes; track t) { <mat-option [value]="t">{{ t | titlecase }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea matInput formControlName="message" rows="3"></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="accent" type="submit" [disabled]="broadcastForm.invalid || sending()" class="full-width">
+            @if (sending()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>send</mat-icon> Broadcast }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Single -->
+    <mat-card class="tool-card">
+      <mat-card-header>
+        <div mat-card-avatar class="single-avatar"><mat-icon>person</mat-icon></div>
+        <mat-card-title>Send to User</mat-card-title>
+        <mat-card-subtitle>Send notification to a specific patient</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="singleForm" (ngSubmit)="sendSingle()" class="notif-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>User ID</mat-label>
+            <input matInput formControlName="user_id" placeholder="PAT001">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              @for (t of notifTypes; track t) { <mat-option [value]="t">{{ t | titlecase }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea matInput formControlName="message" rows="2"></textarea>
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="submit" [disabled]="singleForm.invalid || sending()" class="full-width">
+            @if (sending()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>send</mat-icon> Send }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Recent Notifications -->
+  <mat-card class="recent-card" style="margin-top:24px">
+    <mat-card-header><mat-card-title>All Notifications ({{ notifications().length }})</mat-card-title></mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-center"><mat-spinner diameter="40"></mat-spinner></div>
+      } @else if (notifications().length === 0) {
+        <div class="empty">No notifications sent yet.</div>
+      } @else {
+        <div class="notif-list">
+          @for (n of notifications(); track n.id) {
+            <div class="notif-row" [class.unread]="!n.read">
+              <div class="notif-icon" [style.background-color]="typeColor(n.type)">
+                <mat-icon>{{ typeIcon(n.type) }}</mat-icon>
+              </div>
+              <div class="notif-body">
+                <div class="notif-title">{{ n.title }}</div>
+                <div class="notif-msg">{{ n.message }}</div>
+                <div class="notif-meta">User: {{ n.user_id }} &bull; {{ n.created_at | date:'medium' }}</div>
+              </div>
+              @if (!n.read) { <mat-chip color="warn" highlighted>Unread</mat-chip> }
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

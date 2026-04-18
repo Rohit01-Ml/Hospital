@@ -1,0 +1,69 @@
+.sidenav-container { height: 100vh; }
+
+.sidenav {
+  width: 260px;
+  background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: #fff; border-right: none !important;
+}
+.sidenav-header {
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  mat-icon { font-size: 2rem; width: 2rem; height: 2rem; color: var(--accent-light); }
+}
+.brand { display: block; font-size: 1.2rem; font-weight: 700; color: #fff;
+  strong { color: var(--accent-light); } }
+.role-badge {
+  display: block; font-size: .7rem; color: rgba(255,255,255,.55);
+  text-transform: uppercase; letter-spacing: .8px; margin-top: .1rem;
+}
+
+.nav-list { padding: .75rem 0; }
+.nav-item {
+  margin: .15rem .75rem; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,.75) !important;
+  transition: background .2s, color .2s;
+  &:hover { background: rgba(255,255,255,.1) !important; color: #fff !important; }
+  mat-icon { color: inherit !important; }
+}
+::ng-deep .active-link {
+  background: rgba(255,255,255,.15) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.sidenav-footer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,.15);
+  button { color: rgba(255,255,255,.6); }
+}
+.user-info { display: flex; align-items: center; gap: .75rem; overflow: hidden; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 1rem; flex-shrink: 0;
+}
+.avatar-sm {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .9rem;
+}
+.user-name  { font-size: .85rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: .72rem; color: rgba(255,255,255,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.toolbar {
+  background: #fff !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dark);
+  position: sticky; top: 0; z-index: 100;
+}
+.toolbar-title { font-size: 1.1rem; font-weight: 600; }
+.spacer { flex: 1; }
+.main-content { background: var(--bg-light); }
+.content-area { padding: 1.5rem; min-height: calc(100vh - 64px); }

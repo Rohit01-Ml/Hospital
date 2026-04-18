@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"winget install Microsoft.ODBCDriver17forSQLServer --silent --accept-package-agreements --accept-source-agreements\")",
+      "Bash(python -c ':*)",
+      "Bash(powershell:*)"
+    ]
+  }
+}

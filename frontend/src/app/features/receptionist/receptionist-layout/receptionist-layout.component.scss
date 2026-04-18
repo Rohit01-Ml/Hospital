@@ -1,0 +1,103 @@
+.layout {
+  display: flex; height: 100vh; overflow: hidden;
+  &.collapsed .sidebar { width: 64px; }
+  &.collapsed .nav-label,
+  &.collapsed .brand-name,
+  &.collapsed .user-details,
+  &.collapsed .dept-banner .dept-info { display: none; }
+  &.collapsed .dept-banner { justify-content: center; padding: .6rem; }
+}
+
+.sidebar {
+  width: 240px;
+  background: linear-gradient(170deg, #004d40 0%, #00251a 100%);
+  color: #fff;
+  display: flex; flex-direction: column;
+  transition: width .25s ease;
+  flex-shrink: 0; overflow: hidden;
+}
+
+.sidebar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.brand {
+  display: flex; align-items: center; gap: .6rem;
+  mat-icon { font-size: 1.5rem; color: #80cbc4; }
+}
+.brand-name { font-size: .95rem; font-weight: 800; letter-spacing: .5px; white-space: nowrap; color: #e0f2f1; }
+
+.toggle-btn {
+  background: none; border: none; color: rgba(255,255,255,.6);
+  cursor: pointer; padding: .25rem; display: flex; align-items: center;
+  border-radius: 6px;
+  &:hover { background: rgba(255,255,255,.1); color: #fff; }
+}
+
+/* ── Department Banner ──────────────────────────────────────────────────── */
+.dept-banner {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .75rem 1rem;
+  background: rgba(255,255,255,.1);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  mat-icon { color: #80cbc4; font-size: 1.2rem; flex-shrink: 0; }
+}
+.dept-info { display: flex; flex-direction: column; overflow: hidden; }
+.dept-name { font-size: .88rem; font-weight: 800; color: #e0f2f1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dept-sub { font-size: .65rem; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── User Info ───────────────────────────────────────────────────────────── */
+.user-info {
+  display: flex; align-items: center; gap: .75rem; padding: .85rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.user-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,.18); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .95rem; flex-shrink: 0;
+}
+.user-name  { display: block; font-size: .84rem; font-weight: 600; white-space: nowrap; }
+.user-role  { display: block; font-size: .7rem; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .4px; }
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+.nav { flex: 1; padding: .5rem 0; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: .85rem; padding: .72rem 1rem;
+  color: rgba(255,255,255,.7); text-decoration: none; font-size: .87rem;
+  transition: all .15s; border-left: 3px solid transparent; white-space: nowrap;
+  mat-icon { font-size: 1.15rem; flex-shrink: 0; }
+  &:hover  { background: rgba(255,255,255,.07); color: #fff; }
+  &.active { background: rgba(255,255,255,.13); color: #fff; border-left-color: #80cbc4; font-weight: 600; }
+}
+
+.logout-btn {
+  display: flex; align-items: center; gap: .85rem; padding: .85rem 1rem;
+  background: none; border: none; color: rgba(255,255,255,.55); cursor: pointer;
+  font-size: .87rem; width: 100%; border-top: 1px solid rgba(255,255,255,.08);
+  transition: all .15s; white-space: nowrap;
+  mat-icon { font-size: 1.15rem; flex-shrink: 0; }
+  &:hover { background: rgba(255,255,255,.07); color: #fff; }
+}
+
+/* ── Main content ────────────────────────────────────────────────────────── */
+.main-content {
+  flex: 1; overflow-y: auto;
+  background: #f0faf8; display: flex; flex-direction: column;
+}
+
+/* ── Department context bar ──────────────────────────────────────────────── */
+.dept-context-bar {
+  display: flex; align-items: center; gap: .5rem;
+  background: #00695c; color: #e0f2f1;
+  padding: .5rem 1.5rem; font-size: .82rem; flex-shrink: 0;
+  mat-icon { font-size: 1rem; color: #80cbc4; }
+  strong { color: #fff; font-weight: 700; }
+  .ctx-sep { color: rgba(255,255,255,.4); }
+  .ctx-note { color: rgba(255,255,255,.65); }
+}
+
+/* inner scroll container for routed pages */
+.page-wrap { flex: 1; overflow-y: auto; padding: 1.75rem; }

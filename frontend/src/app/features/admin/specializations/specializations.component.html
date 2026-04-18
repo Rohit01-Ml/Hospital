@@ -1,0 +1,65 @@
+<div class="page-header flex justify-between items-center">
+  <div>
+    <h2>Specializations</h2>
+    <p>Manage medical departments and specializations.</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="openAdd()">
+    <mat-icon>add</mat-icon> Add Specialization
+  </button>
+</div>
+
+@if (loading()) { <div class="loading-center"><mat-spinner></mat-spinner></div> }
+
+@if (showForm()) {
+  <div class="form-panel">
+    <div class="form-header">
+      <h3>{{ editing() ? 'Edit' : 'Add' }} Specialization</h3>
+      <button mat-icon-button (click)="showForm.set(false)"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="spec-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="e.g. Cardiology">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <input matInput formControlName="description">
+      </mat-form-field>
+      <div class="icon-selector">
+        <label>Icon</label>
+        <div class="icon-grid">
+          @for (ic of icons; track ic) {
+            <button type="button" class="icon-btn" [class.selected]="form.get('icon')?.value === ic" (click)="form.get('icon')?.setValue(ic)">
+              <mat-icon>{{ ic }}</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="showForm.set(false)">Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+          @if (submitting()) { <mat-spinner diameter="18"></mat-spinner> }
+          @else { Save }
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+<div class="spec-grid">
+  @for (spec of specs(); track spec.id) {
+    <div class="spec-card">
+      <div class="spec-icon-wrap">
+        <mat-icon>{{ spec.icon }}</mat-icon>
+      </div>
+      <div class="spec-info">
+        <h3>{{ spec.name }}</h3>
+        <p>{{ spec.description }}</p>
+      </div>
+      <div class="spec-actions">
+        <button mat-icon-button color="primary" (click)="openEdit(spec)"><mat-icon>edit</mat-icon></button>
+        <button mat-icon-button color="warn" (click)="delete(spec)"><mat-icon>delete</mat-icon></button>
+      </div>
+    </div>
+  }
+</div>

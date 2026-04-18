@@ -1,0 +1,24 @@
+.page-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: #1565c0; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.page-title mat-icon { font-size: 2rem; height: 2rem; width: 2rem; }
+.page-subtitle { color: #666; margin: 0; }
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+.form-card { border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.reminder-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: flex; gap: 16px; }
+.flex-1 { flex: 1; }
+.full-width { width: 100%; }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; }
+.reminders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+.reminder-card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); border-left: 4px solid #1565c0; transition: opacity 0.2s; }
+.reminder-card.inactive { opacity: 0.6; border-left-color: #aaa; }
+.med-avatar { display: flex; align-items: center; justify-content: center; background: #e3f2fd; mat-icon { color: #1565c0; } }
+.med-avatar.active { background: #e3f2fd; }
+.times-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.times-chips mat-chip { font-size: 0.75rem; display: flex; align-items: center; gap: 4px; }
+.date-range { font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+.instructions-text { font-size: 0.85rem; color: #888; margin: 0; }
+.tiny-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; color: #aaa; text-align: center; }
+.empty-icon { font-size: 5rem; height: 5rem; width: 5rem; color: #ddd; margin-bottom: 16px; }

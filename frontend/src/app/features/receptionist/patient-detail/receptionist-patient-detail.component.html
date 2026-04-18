@@ -1,0 +1,260 @@
+<div class="back-bar">
+  <a routerLink="/receptionist/patients" class="back-link"><mat-icon>arrow_back</mat-icon> Patients</a>
+</div>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+} @else if (patient()) {
+
+  <!-- ── Patient Header ────────────────────────────────────────────────── -->
+  <div class="patient-header">
+    <div class="pat-avatar-big">{{ patient().name[0] }}</div>
+    <div class="pat-header-info">
+      <h2>{{ patient().name }}
+        @if (patient().walk_in) { <span class="walkin-chip">Walk-in</span> }
+      </h2>
+      <div class="meta-row">
+        @if (patient().age) { <span><mat-icon>cake</mat-icon> Age {{ patient().age }}</span> }
+        @if (patient().gender) { <span><mat-icon>{{ genderIcon(patient().gender) }}</mat-icon> {{ patient().gender | titlecase }}</span> }
+        @if (patient().blood_group) { <span><mat-icon>water_drop</mat-icon> {{ patient().blood_group }}</span> }
+        @if (patient().phone) { <span><mat-icon>phone</mat-icon> {{ patient().phone }}</span> }
+        @if (patient().email && !patient().email.includes('@hospital.local')) {
+          <span><mat-icon>email</mat-icon> {{ patient().email }}</span>
+        }
+      </div>
+      @if (patient().address) { <p class="address"><mat-icon>location_on</mat-icon> {{ patient().address }}</p> }
+    </div>
+    <button class="edit-info-btn" (click)="openEdit()"><mat-icon>edit</mat-icon> Edit Info</button>
+  </div>
+
+  <!-- ── Tabs ─────────────────────────────────────────────────────────── -->
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab() === 'info'" (click)="activeTab.set('info')">
+      <mat-icon>person</mat-icon> Details
+    </button>
+    <button class="tab" [class.active]="activeTab() === 'appointments'" (click)="activeTab.set('appointments')">
+      <mat-icon>event</mat-icon> Appointments ({{ appointments().length }})
+    </button>
+    <button class="tab" [class.active]="activeTab() === 'prescriptions'" (click)="activeTab.set('prescriptions')">
+      <mat-icon>description</mat-icon> Prescriptions ({{ prescriptions().length }})
+    </button>
+  </div>
+
+  <!-- ── Info Tab ──────────────────────────────────────────────────────── -->
+  @if (activeTab() === 'info') {
+    <div class="tab-content">
+      <div class="info-grid">
+        <div class="info-card">
+          <h4><mat-icon>person</mat-icon> Personal Details</h4>
+          <div class="info-row"><label>Full Name</label><span>{{ patient().name }}</span></div>
+          <div class="info-row"><label>Age</label><span>{{ patient().age || '—' }}</span></div>
+          <div class="info-row"><label>Gender</label><span>{{ (patient().gender | titlecase) || '—' }}</span></div>
+          <div class="info-row"><label>Blood Group</label><span>{{ patient().blood_group || '—' }}</span></div>
+        </div>
+        <div class="info-card">
+          <h4><mat-icon>contact_phone</mat-icon> Contact Info</h4>
+          <div class="info-row"><label>Phone</label><span>{{ patient().phone || '—' }}</span></div>
+          <div class="info-row"><label>Email</label>
+            <span>{{ (patient().email?.includes('@hospital.local')) ? '—' : (patient().email || '—') }}</span>
+          </div>
+          <div class="info-row"><label>Address</label><span>{{ patient().address || '—' }}</span></div>
+        </div>
+        <div class="info-card">
+          <h4><mat-icon>info</mat-icon> Account Info</h4>
+          <div class="info-row"><label>Patient Type</label>
+            <span>{{ patient().walk_in ? 'Walk-in Patient' : 'Registered Patient' }}</span>
+          </div>
+          <div class="info-row"><label>Total Visits</label><span>{{ appointments().length }}</span></div>
+          <div class="info-row"><label>Prescriptions</label><span>{{ prescriptions().length }}</span></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Appointments Tab ──────────────────────────────────────────────── -->
+  @if (activeTab() === 'appointments') {
+    <div class="tab-content">
+      @if (appointments().length === 0) {
+        <div class="empty-state"><mat-icon>event_busy</mat-icon><p>No appointments in your department</p></div>
+      } @else {
+        <div class="apt-list">
+          @for (apt of appointments(); track apt.id) {
+            <div class="apt-card">
+              <div class="apt-top">
+                <div class="apt-token">#{{ apt.token_number }}</div>
+                <div class="apt-info">
+                  <strong>{{ apt.doctor?.name || 'Doctor' }}</strong>
+                  <span>{{ apt.date }} · {{ apt.time_slot }}</span>
+                  @if (apt.notes) { <small>{{ apt.notes }}</small> }
+                </div>
+                <div class="apt-status" [class]="'s-' + statusColor(apt.status)">{{ apt.status | titlecase }}</div>
+              </div>
+              @if (apt.status === 'waiting' || apt.status === 'in_progress') {
+                <div class="apt-actions-row">
+                  <button class="sm-btn" (click)="openAddPrescription(apt)">
+                    <mat-icon>add</mat-icon> Add Prescription
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Prescriptions Tab ─────────────────────────────────────────────── -->
+  @if (activeTab() === 'prescriptions') {
+    <div class="tab-content">
+      <div class="tab-actions">
+        <button class="primary-btn" (click)="openAddPrescription()"><mat-icon>add</mat-icon> Add Prescription</button>
+      </div>
+
+      @if (prescriptions().length === 0) {
+        <div class="empty-state"><mat-icon>description</mat-icon><p>No prescriptions yet</p></div>
+      } @else {
+        @for (p of prescriptions(); track p.id) {
+          <div class="presc-card">
+            <div class="presc-header">
+              <div class="presc-title">
+                <mat-icon>description</mat-icon>
+                <div>
+                  <strong>{{ p.diagnosis }}</strong>
+                  <span>by {{ p.doctor_name }} · {{ p.created_at | date:'mediumDate' }}</span>
+                </div>
+              </div>
+              <button class="icon-btn" (click)="openEditPrescription(p)" title="Edit prescription">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+
+            <div class="medicines-table">
+              <div class="med-head"><span>Medicine</span><span>Dosage</span><span>Frequency</span><span>Duration</span></div>
+              @for (m of p.medicines; track m.name) {
+                <div class="med-row">
+                  <span class="med-name">{{ m.name }}</span>
+                  <span>{{ m.dosage }}</span>
+                  <span>{{ m.frequency }}</span>
+                  <span>{{ m.duration }}</span>
+                </div>
+                @if (m.instructions) { <div class="med-note">{{ m.instructions }}</div> }
+              }
+            </div>
+
+            @if (p.notes) { <p class="presc-notes"><mat-icon>notes</mat-icon> {{ p.notes }}</p> }
+            @if (p.follow_up_date) {
+              <p class="follow-up"><mat-icon>event_repeat</mat-icon> Follow-up: {{ p.follow_up_date }}</p>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+}
+
+<!-- ── Edit Patient Modal ─────────────────────────────────────────────────── -->
+@if (editOpen()) {
+  <div class="modal-overlay" (click)="editOpen.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>edit</mat-icon> Edit Patient Info</h3>
+        <button class="close-btn" (click)="editOpen.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field full"><label>Full Name <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="editForm.name" class="field-input"></div>
+          <div class="field"><label>Phone</label>
+            <input type="tel" [(ngModel)]="editForm.phone" class="field-input"></div>
+          <div class="field"><label>Email</label>
+            <input type="email" [(ngModel)]="editForm.email" class="field-input"></div>
+          <div class="field"><label>Age</label>
+            <input type="number" [(ngModel)]="editForm.age" class="field-input" min="0" max="120"></div>
+          <div class="field"><label>Gender</label>
+            <select [(ngModel)]="editForm.gender" class="field-input">
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field"><label>Blood Group</label>
+            <select [(ngModel)]="editForm.blood_group" class="field-input">
+              <option value="">Select</option>
+              @for (bg of ['A+','A-','B+','B-','AB+','AB-','O+','O-']; track bg) {
+                <option [value]="bg">{{ bg }}</option>
+              }
+            </select>
+          </div>
+          <div class="field full"><label>Address</label>
+            <textarea [(ngModel)]="editForm.address" class="field-input" rows="2"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="editOpen.set(false)" [disabled]="saving()">Cancel</button>
+        <button class="save-btn" (click)="saveEdit()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>save</mat-icon> Save }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Prescription Modal ─────────────────────────────────────────────────── -->
+@if (prescModal()) {
+  <div class="modal-overlay" (click)="prescModal.set(false)">
+    <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>description</mat-icon> {{ editingPrescId() ? 'Edit' : 'Add' }} Prescription</h3>
+        <button class="close-btn" (click)="prescModal.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="modal-body">
+        <div class="field full" style="margin-bottom:1rem">
+          <label>Diagnosis <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="prescForm.diagnosis" class="field-input" placeholder="e.g., Viral Fever">
+        </div>
+
+        <div class="medicines-section">
+          <div class="section-label">
+            <mat-icon>medication</mat-icon> Medicines
+            <button class="add-med-btn" (click)="addMedicine()"><mat-icon>add</mat-icon> Add</button>
+          </div>
+          @for (med of prescForm.medicines; track med; let i = $index) {
+            <div class="med-form-row">
+              <div class="med-fields">
+                <div class="field"><label>Medicine Name <span class="req">*</span></label>
+                  <input type="text" [(ngModel)]="med.name" class="field-input" placeholder="Drug name"></div>
+                <div class="field"><label>Dosage</label>
+                  <input type="text" [(ngModel)]="med.dosage" class="field-input" placeholder="e.g., 500mg"></div>
+                <div class="field"><label>Frequency</label>
+                  <input type="text" [(ngModel)]="med.frequency" class="field-input" placeholder="e.g., Twice daily"></div>
+                <div class="field"><label>Duration</label>
+                  <input type="text" [(ngModel)]="med.duration" class="field-input" placeholder="e.g., 7 days"></div>
+                <div class="field full"><label>Instructions</label>
+                  <input type="text" [(ngModel)]="med.instructions" class="field-input" placeholder="e.g., After meals"></div>
+              </div>
+              @if (prescForm.medicines.length > 1) {
+                <button class="remove-med-btn" (click)="removeMedicine(i)"><mat-icon>delete</mat-icon></button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-grid" style="margin-top:1rem">
+          <div class="field full"><label>Notes</label>
+            <textarea [(ngModel)]="prescForm.notes" class="field-input" rows="2" placeholder="Doctor's instructions, lifestyle advice..."></textarea>
+          </div>
+          <div class="field"><label>Follow-up Date</label>
+            <input type="date" [(ngModel)]="prescForm.follow_up_date" class="field-input"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="prescModal.set(false)" [disabled]="saving()">Cancel</button>
+        <button class="save-btn" (click)="savePrescription()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+          @else { <mat-icon>save</mat-icon> {{ editingPrescId() ? 'Update' : 'Save Prescription' }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}

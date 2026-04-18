@@ -1,0 +1,121 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>biotech</mat-icon> Lab Tests Management</h1>
+      <p class="page-subtitle">Manage test types and track patient bookings</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openAdd()">
+      <mat-icon>add</mat-icon> Add Test Type
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>{{ editingId() ? 'Edit' : 'Add' }} Lab Test Type</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="test-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-2">
+              <mat-label>Test Name</mat-label>
+              <input matInput formControlName="name">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                @for (c of categories; track c) {
+                  <mat-option [value]="c">{{ c }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="2"></textarea>
+          </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Price (₹)</mat-label>
+              <input matInput type="number" formControlName="price">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Turnaround (hours)</mat-label>
+              <input matInput type="number" formControlName="turnaround_hours">
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+              @if (saving()) { <mat-spinner diameter="18"></mat-spinner> } @else { Save }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else {
+    <mat-card class="table-card">
+      <mat-card-header><mat-card-title>Test Types ({{ types().length }})</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="types()" class="full-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let t"><strong>{{ t.name }}</strong><br><small class="muted">{{ t.description }}</small></td>
+          </ng-container>
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let t"><mat-chip>{{ t.category }}</mat-chip></td>
+          </ng-container>
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let t">₹{{ t.price }}</td>
+          </ng-container>
+          <ng-container matColumnDef="turnaround">
+            <th mat-header-cell *matHeaderCellDef>Turnaround</th>
+            <td mat-cell *matCellDef="let t">{{ t.turnaround_hours }}h</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let t">
+              <button mat-icon-button color="primary" (click)="openEdit(t)" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="delete(t.id)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="typeCols"></tr>
+          <tr mat-row *matRowDef="let r; columns: typeCols;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="table-card" style="margin-top:24px">
+      <mat-card-header><mat-card-title>Patient Bookings ({{ bookings().length }})</mat-card-title></mat-card-header>
+      <mat-card-content>
+        @if (bookings().length === 0) {
+          <div class="empty">No lab bookings yet.</div>
+        } @else {
+          <div class="bookings-list">
+            @for (b of bookings(); track b.id) {
+              <div class="booking-row">
+                <div class="booking-info">
+                  <div class="booking-test">{{ b.test_type?.name || 'Lab Test' }}</div>
+                  <div class="booking-meta">Patient: {{ b.patient_name || b.patient_id }} &bull; {{ b.booked_at | date:'mediumDate' }}</div>
+                </div>
+                <div class="booking-badges">
+                  <span class="status-pill" [style.background-color]="statusColor(b.status)">{{ b.status | titlecase }}</span>
+                  <span class="pay-pill" [class.paid]="b.payment_status === 'paid'">{{ b.payment_status | titlecase }}</span>
+                </div>
+                <mat-select [value]="b.status" (selectionChange)="updateStatus(b.id, $event.value)" class="status-select">
+                  @for (s of statusOptions; track s) {
+                    <mat-option [value]="s">{{ s | titlecase }}</mat-option>
+                  }
+                </mat-select>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

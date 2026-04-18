@@ -1,0 +1,138 @@
+<!-- ── NAVBAR ───────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <mat-icon>local_hospital</mat-icon>
+      <span>MediCare<strong>+</strong></span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#departments">Departments</a>
+      <a href="#stats">About</a>
+    </div>
+    <div class="nav-actions">
+      @if (auth.isLoggedIn()) {
+        <button mat-flat-button color="primary" [routerLink]="auth.isAdmin() ? '/admin' : '/patient'">
+          <mat-icon>dashboard</mat-icon> Dashboard
+        </button>
+      } @else {
+        <a routerLink="/login" class="nav-link-btn">Sign In</a>
+        <button mat-flat-button color="primary" routerLink="/register">Get Started</button>
+      }
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO SLIDESHOW ──────────────────────────────────────────────────────── -->
+<section class="hero">
+  @for (slide of slides; track slide.title; let i = $index) {
+    <div class="slide" [class.active]="i === currentSlide()" [style.background]="slide.gradient">
+      <div class="slide-content">
+        <div class="slide-icon">
+          <mat-icon>{{ slide.icon }}</mat-icon>
+        </div>
+        <h1>{{ slide.title }}</h1>
+        <p>{{ slide.subtitle }}</p>
+        <div class="slide-actions">
+          <button mat-flat-button class="hero-cta" (click)="getStarted()">
+            {{ slide.cta }} <mat-icon>arrow_forward</mat-icon>
+          </button>
+          <button mat-stroked-button class="hero-secondary" routerLink="/login">
+            Sign In
+          </button>
+        </div>
+      </div>
+      <div class="slide-decoration">
+        <div class="deco-circle c1"></div>
+        <div class="deco-circle c2"></div>
+        <div class="deco-circle c3"></div>
+      </div>
+    </div>
+  }
+  <!-- Dots -->
+  <div class="slide-dots">
+    @for (slide of slides; track slide.title; let i = $index) {
+      <button class="dot" [class.active]="i === currentSlide()" (click)="goToSlide(i)"></button>
+    }
+  </div>
+  <!-- Scroll hint -->
+  <div class="scroll-hint">
+    <mat-icon>keyboard_arrow_down</mat-icon>
+  </div>
+</section>
+
+<!-- ── STATS STRIP ─────────────────────────────────────────────────────────── -->
+<section class="stats-strip" id="stats">
+  @for (stat of stats; track stat.label) {
+    <div class="stat-item">
+      <mat-icon>{{ stat.icon }}</mat-icon>
+      <span class="stat-value">{{ stat.value }}</span>
+      <span class="stat-label">{{ stat.label }}</span>
+    </div>
+  }
+</section>
+
+<!-- ── FEATURES ────────────────────────────────────────────────────────────── -->
+<section class="section" id="features">
+  <div class="section-header">
+    <span class="section-tag">Why Choose Us</span>
+    <h2>Everything You Need for Better Health</h2>
+    <p>A complete digital health platform designed for patients and medical professionals.</p>
+  </div>
+  <div class="features-grid">
+    @for (f of features; track f.title) {
+      <div class="feature-card">
+        <div class="feature-icon" [style.background]="f.color + '18'" [style.color]="f.color">
+          <mat-icon>{{ f.icon }}</mat-icon>
+        </div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.description }}</p>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ── DEPARTMENTS ─────────────────────────────────────────────────────────── -->
+<section class="section dept-section" id="departments">
+  <div class="section-header">
+    <span class="section-tag">Departments</span>
+    <h2>World-Class Medical Specialties</h2>
+    <p>Our expert teams deliver exceptional care across a wide range of medical disciplines.</p>
+  </div>
+  <div class="dept-grid">
+    @for (d of departments; track d.name) {
+      <div class="dept-card" [style.--dept-color]="d.color">
+        <div class="dept-icon-wrap">
+          <mat-icon>{{ d.icon }}</mat-icon>
+        </div>
+        <span>{{ d.name }}</span>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- ── CTA BANNER ─────────────────────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="cta-inner">
+    <mat-icon class="cta-icon">health_and_safety</mat-icon>
+    <div>
+      <h2>Ready to Take Charge of Your Health?</h2>
+      <p>Join thousands of patients who trust MediCare+ for their healthcare needs.</p>
+    </div>
+    <button mat-flat-button class="cta-btn" (click)="getStarted()">
+      Start Now <mat-icon>east</mat-icon>
+    </button>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <mat-icon>local_hospital</mat-icon>
+      <span>MediCare<strong>+</strong></span>
+    </div>
+    <p>© 2024 MediCare+ Hospital Management System. All rights reserved.</p>
+    <p class="footer-note">Built with ❤️ for better healthcare.</p>
+  </div>
+</footer>

@@ -1,0 +1,61 @@
+<div class="layout" [class.collapsed]="!sidebarOpen()">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <mat-icon>local_hospital</mat-icon>
+        <span class="brand-name">MediCare+</span>
+      </div>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Department Banner -->
+    @if (department()) {
+      <div class="dept-banner">
+        <mat-icon>medical_services</mat-icon>
+        <div class="dept-info">
+          <span class="dept-name">{{ department() }}</span>
+          <span class="dept-sub">Department</span>
+        </div>
+      </div>
+    }
+
+    <div class="user-info">
+      <div class="user-avatar">{{ auth.user()?.name?.[0] }}</div>
+      <div class="user-details">
+        <span class="user-name">{{ auth.user()?.name }}</span>
+        <span class="user-role">Receptionist</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems; track item.route) {
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <button class="logout-btn" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span class="nav-label">Logout</span>
+    </button>
+  </aside>
+
+  <main class="main-content">
+    <!-- Department context bar visible on all pages -->
+    @if (department()) {
+      <div class="dept-context-bar">
+        <mat-icon>medical_services</mat-icon>
+        <span><strong>{{ department() }}</strong> Department</span>
+        <span class="ctx-sep">·</span>
+        <span class="ctx-note">Showing only {{ department() }} doctors &amp; patients</span>
+      </div>
+    }
+    <div class="page-wrap">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

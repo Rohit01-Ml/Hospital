@@ -1,0 +1,44 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav [opened]="sidenavOpen()" mode="side" class="sidenav">
+    <div class="sidenav-header">
+      <mat-icon>local_hospital</mat-icon>
+      <div>
+        <span class="brand">MediCare<strong>+</strong></span>
+        <span class="role-badge">Admin Console</span>
+      </div>
+    </div>
+    <mat-nav-list class="nav-list">
+      @for (item of navItems; track item.route) {
+        <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link" class="nav-item">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+    <div class="sidenav-footer">
+      <div class="user-info">
+        <div class="avatar">{{ auth.user()?.name?.[0] }}</div>
+        <div>
+          <div class="user-name">{{ auth.user()?.name }}</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button mat-icon-button (click)="auth.logout()"><mat-icon>logout</mat-icon></button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="sidenav.toggle()"><mat-icon>menu</mat-icon></button>
+      <span class="toolbar-title">Admin Console</span>
+      <span class="spacer"></span>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <div class="avatar-sm">{{ auth.user()?.name?.[0] }}</div>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="auth.logout()"><mat-icon>logout</mat-icon> Logout</button>
+      </mat-menu>
+    </mat-toolbar>
+    <div class="content-area"><router-outlet /></div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

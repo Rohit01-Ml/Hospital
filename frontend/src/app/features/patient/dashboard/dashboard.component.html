@@ -1,0 +1,77 @@
+<div class="page-header">
+  <h2>Welcome back, {{ auth.user()?.name }} 👋</h2>
+  <p>Here's your health summary for today.</p>
+</div>
+
+@if (loading()) {
+  <div class="loading-overlay"><mat-spinner></mat-spinner></div>
+}
+
+<!-- Stats -->
+<div class="stats-grid">
+  @for (stat of stats; track stat.label) {
+    <a class="stat-card" [style.--c]="stat.color" [routerLink]="stat.route">
+      <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
+      <div>
+        <div class="stat-val">{{ stat.value }}</div>
+        <div class="stat-lbl">{{ stat.label }}</div>
+      </div>
+    </a>
+  }
+</div>
+
+<!-- Quick Actions -->
+<div class="section-heading" style="margin-top:8px">
+  <h3>Quick Access</h3>
+</div>
+<div class="quick-actions-row">
+  <a routerLink="/patient/prescriptions" class="quick-btn"><mat-icon>description</mat-icon> Prescriptions</a>
+  <a routerLink="/patient/lab-tests" class="quick-btn"><mat-icon>biotech</mat-icon> Lab Tests</a>
+  <a routerLink="/patient/reports" class="quick-btn"><mat-icon>assessment</mat-icon> Reports</a>
+  <a routerLink="/patient/payments" class="quick-btn"><mat-icon>payment</mat-icon> Payments</a>
+  <a routerLink="/patient/medicine-reminders" class="quick-btn accent"><mat-icon>medication</mat-icon> Reminders</a>
+</div>
+
+<!-- Today's appointments -->
+<div class="section-heading">
+  <h3>Today's Appointments</h3>
+  <a routerLink="/patient/book" mat-flat-button color="primary">
+    <mat-icon>add</mat-icon> Book New
+  </a>
+</div>
+
+@if (todayApts().length === 0 && !loading()) {
+  <div class="empty-state">
+    <mat-icon>event_busy</mat-icon>
+    <h3>No appointments today</h3>
+    <p>Book your first appointment with a specialist.</p>
+    <a routerLink="/patient/book" mat-flat-button color="primary">Book Appointment</a>
+  </div>
+} @else {
+  <div class="apts-grid">
+    @for (apt of todayApts(); track apt.id) {
+      <div class="apt-card">
+        <div class="apt-card-top">
+          <div class="token-badge">#{{ apt.token_number }}</div>
+          <span class="badge {{ statusClass(apt.status) }}">{{ apt.status.replace('_', ' ') }}</span>
+        </div>
+        <div class="apt-doctor">
+          <div class="doc-avatar">{{ apt.doctor?.name?.[0] || 'D' }}</div>
+          <div>
+            <div class="doc-name">{{ apt.doctor?.name }}</div>
+            <div class="doc-spec">{{ apt.specialization?.name }}</div>
+          </div>
+        </div>
+        <div class="apt-meta">
+          <span><mat-icon>schedule</mat-icon> {{ apt.time_slot }}</span>
+          <span><mat-icon>star</mat-icon> {{ apt.doctor?.rating }}/5</span>
+        </div>
+        @if (apt.status === 'waiting' || apt.status === 'in_progress') {
+          <a [routerLink]="['/patient/queue', apt.doctor_id]" mat-stroked-button color="primary" class="track-btn">
+            <mat-icon>queue</mat-icon> Track Queue
+          </a>
+        }
+      </div>
+    }
+  </div>
+}

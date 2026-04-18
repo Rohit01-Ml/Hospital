@@ -1,0 +1,55 @@
+.auth-page {
+  display: flex; min-height: 100vh;
+  @media(max-width: 900px) { flex-direction: column; }
+}
+.auth-left {
+  flex: 1;
+  background: linear-gradient(145deg, #004d40 0%, #00695c 60%, #00897b 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 3rem 2rem; position: relative; overflow: hidden;
+  &::after {
+    content: ''; position: absolute; width: 400px; height: 400px;
+    border-radius: 50%; background: rgba(255,255,255,.04);
+    top: -100px; left: -80px;
+  }
+  @media(max-width: 900px) { min-height: 200px; padding: 2rem; }
+}
+.auth-left-content { position: relative; z-index: 1; color: #fff; max-width: 380px; }
+.logo {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;
+  .material-icons { font-size: 2rem; color: #a7ffeb; }
+  strong { color: #a7ffeb; }
+}
+.auth-left-content h1 { color: #fff; font-size: 2rem; margin-bottom: 1rem; }
+.auth-left-content p  { color: rgba(255,255,255,.75); margin-bottom: 1.5rem; }
+.af-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .5rem 0; color: rgba(255,255,255,.85);
+  .material-icons { font-size: 1.2rem; color: #a7ffeb; }
+}
+.auth-right {
+  display: flex; align-items: center; justify-content: center;
+  flex: 1; background: var(--bg-light); padding: 2rem;
+}
+.auth-card {
+  background: #fff; border-radius: var(--radius-lg);
+  padding: 2.5rem; width: 100%; max-width: 440px;
+  box-shadow: var(--shadow-xl);
+  h2 { font-family: 'Playfair Display', serif; margin-bottom: .35rem; }
+}
+.auth-sub {
+  margin-bottom: 1.25rem; font-size: .9rem;
+  a { color: var(--accent); font-weight: 600; text-decoration: none;
+      &:hover { text-decoration: underline; } }
+}
+.submit-btn {
+  width: 100%; padding: .85rem !important; font-size: 1rem !important;
+  font-weight: 600 !important; border-radius: var(--radius-sm) !important;
+  margin-top: .5rem; display: flex; align-items: center; justify-content: center;
+}
+.terms {
+  margin-top: 1rem; font-size: .78rem; color: var(--text-light); text-align: center;
+  a { color: var(--primary); text-decoration: none;
+      &:hover { text-decoration: underline; } }
+}

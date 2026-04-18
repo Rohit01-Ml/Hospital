@@ -1,0 +1,44 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>notifications</mat-icon> Notifications</h1>
+      <p class="page-subtitle">
+        @if (unreadCount() > 0) { {{ unreadCount() }} unread notification{{ unreadCount() > 1 ? 's' : '' }} }
+        @else { All caught up! }
+      </p>
+    </div>
+    @if (unreadCount() > 0) {
+      <button mat-stroked-button color="primary" (click)="markAllRead()">
+        <mat-icon>done_all</mat-icon> Mark All Read
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (notifications().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">notifications_none</mat-icon>
+      <h3>No Notifications</h3>
+      <p>You're all caught up!</p>
+    </div>
+  } @else {
+    <div class="notifications-list">
+      @for (n of notifications(); track n.id) {
+        <div class="notification-item" [class.unread]="!n.read" (click)="markRead(n.id)">
+          <div class="notif-icon" [style.background-color]="typeColor(n.type)">
+            <mat-icon>{{ typeIcon(n.type) }}</mat-icon>
+          </div>
+          <div class="notif-body">
+            <div class="notif-title">{{ n.title }}</div>
+            <div class="notif-message">{{ n.message }}</div>
+            <div class="notif-time">{{ n.created_at | date:'medium' }}</div>
+          </div>
+          @if (!n.read) {
+            <div class="unread-dot"></div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

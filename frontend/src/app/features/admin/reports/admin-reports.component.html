@@ -1,0 +1,89 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>assessment</mat-icon> Reports Management</h1>
+      <p class="page-subtitle">Upload and manage patient medical reports</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openAdd()">
+      <mat-icon>upload_file</mat-icon> Upload Report
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>{{ editingId() ? 'Edit' : 'Upload' }} Report</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="report-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Patient ID</mat-label>
+              <input matInput formControlName="patient_id" placeholder="PAT001">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-2">
+              <mat-label>Report Title</mat-label>
+              <input matInput formControlName="title">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                @for (s of statusOptions; track s) {
+                  <mat-option [value]="s">{{ s | titlecase }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Findings</mat-label>
+            <textarea matInput formControlName="findings" rows="3"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Interpretation</mat-label>
+            <textarea matInput formControlName="interpretation" rows="2"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>File URL (optional)</mat-label>
+            <input matInput formControlName="file_url" placeholder="https://...">
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+              @if (saving()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>save</mat-icon> Save }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (reports().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">assessment</mat-icon>
+      <h3>No Reports Yet</h3>
+    </div>
+  } @else {
+    <div class="reports-grid">
+      @for (r of reports(); track r.id) {
+        <mat-card class="report-card" [style.border-left-color]="statusColor(r.status)">
+          <mat-card-header>
+            <div mat-card-avatar class="rep-avatar" [style.background-color]="statusColor(r.status)">
+              <mat-icon style="color:white">assessment</mat-icon>
+            </div>
+            <mat-card-title>{{ r.title }}</mat-card-title>
+            <mat-card-subtitle>Patient: {{ r.patient_name || r.patient_id }} &bull; {{ r.created_at | date:'mediumDate' }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="status-badge" [style.background-color]="statusColor(r.status)">{{ r.status | titlecase }}</div>
+            @if (r.findings) { <p class="findings">{{ r.findings }}</p> }
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-icon-button color="primary" (click)="openEdit(r)" matTooltip="Edit"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button (click)="download(r.id)" matTooltip="Download"><mat-icon>download</mat-icon></button>
+            <button mat-icon-button color="warn" (click)="delete(r.id)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

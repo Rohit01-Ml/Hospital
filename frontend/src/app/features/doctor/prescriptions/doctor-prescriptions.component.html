@@ -1,0 +1,136 @@
+<div class="page-header">
+  <div>
+    <h2 class="page-title"><mat-icon>description</mat-icon> Prescriptions</h2>
+    <p class="page-sub">Write and manage patient prescriptions</p>
+  </div>
+  <button class="new-btn" (click)="openNew()"><mat-icon>add</mat-icon> New Prescription</button>
+</div>
+
+<!-- Prescription Form -->
+@if (showForm()) {
+  <div class="form-card">
+    <div class="form-card-header">
+      <span class="form-card-title"><mat-icon>edit_note</mat-icon> Write Prescription</span>
+      <button class="icon-btn" (click)="cancel()"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="rx-form">
+      <!-- Appointment + Patient -->
+      <div class="form-row">
+        <div class="field-group">
+          <label>Appointment</label>
+          <select formControlName="appointment_id" class="select-field" (change)="fillFromAppointment($any($event.target).value)">
+            <option value="">Select appointment</option>
+            @for (a of appointments(); track a.id) {
+              <option [value]="a.id">{{ a.patient?.name || 'Patient' }} — {{ a.time_slot }}</option>
+            }
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Diagnosis</label>
+          <input formControlName="diagnosis" class="text-field" placeholder="e.g. Hypertension Stage 1">
+        </div>
+      </div>
+
+      <!-- Medicines -->
+      <div class="meds-section">
+        <div class="meds-header">
+          <span class="meds-title"><mat-icon>medication</mat-icon> Medicines</span>
+          <button type="button" class="add-med-btn" (click)="addMedicine()"><mat-icon>add</mat-icon> Add</button>
+        </div>
+        @for (med of medicines.controls; track med; let i = $index) {
+          <div class="med-row" [formGroup]="$any(med)">
+            <input formControlName="name"         class="text-field med-name" placeholder="Medicine name *">
+            <input formControlName="dosage"       class="text-field med-sm"   placeholder="Dosage">
+            <input formControlName="frequency"    class="text-field med-sm"   placeholder="Frequency">
+            <input formControlName="duration"     class="text-field med-sm"   placeholder="Duration">
+            <input formControlName="instructions" class="text-field med-inst" placeholder="Instructions">
+            <button type="button" class="remove-btn" (click)="removeMedicine(i)" [disabled]="medicines.length === 1">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Notes + Follow-up -->
+      <div class="form-row">
+        <div class="field-group flex-2">
+          <label>Clinical Notes</label>
+          <textarea formControlName="notes" class="text-field" rows="2" placeholder="Additional instructions for patient..."></textarea>
+        </div>
+
+        <div class="field-group flex-1">
+          <label>Follow-up Reminder</label>
+          <div class="followup-controls">
+            <div class="days-row">
+              <span class="days-label">In</span>
+              <input type="number" class="days-input" min="1" max="365" placeholder="days"
+                     [value]="followUpDays()"
+                     (input)="setFollowUpDays(+$any($event.target).value || null)">
+              <span class="days-label">days</span>
+            </div>
+            <div class="quick-days">
+              @for (d of [3,7,14,30]; track d) {
+                <button type="button" class="quick-btn" [class.active]="followUpDays() === d"
+                        (click)="setFollowUpDays(d)">{{ d }}d</button>
+              }
+            </div>
+            @if (followUpDate()) {
+              <div class="followup-preview">
+                <mat-icon>event</mat-icon>
+                <span>{{ formatFollowUpDisplay(followUpDate()) }}</span>
+                <button type="button" class="clear-btn" (click)="setFollowUpDays(null)"><mat-icon>close</mat-icon></button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="cancel-btn" (click)="cancel()">Cancel</button>
+        <button type="submit" class="save-btn" [disabled]="form.invalid || saving()">
+          @if (saving()) { <mat-spinner diameter="16"></mat-spinner> }
+          @else { <mat-icon>check</mat-icon> Issue Prescription }
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- Prescriptions List -->
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+} @else if (prescriptions().length === 0) {
+  <div class="empty-state">
+    <mat-icon>description</mat-icon>
+    <p>No prescriptions yet</p>
+  </div>
+} @else {
+  <div class="rx-list">
+    @for (rx of prescriptions(); track rx.id) {
+      <div class="rx-card">
+        <div class="rx-card-header">
+          <div class="rx-icon"><mat-icon>description</mat-icon></div>
+          <div class="rx-meta">
+            <div class="rx-diagnosis">{{ rx.diagnosis }}</div>
+            <div class="rx-info">Patient #{{ rx.patient_id }} &bull; {{ rx.created_at | date:'dd MMM yyyy' }}</div>
+          </div>
+          @if (rx.follow_up_date) {
+            <div class="followup-badge">
+              <mat-icon>event_repeat</mat-icon>
+              Follow-up: {{ rx.follow_up_date | date:'dd MMM' }}
+            </div>
+          }
+        </div>
+        <div class="rx-meds">
+          @for (m of rx.medicines; track m.name) {
+            <span class="med-tag"><mat-icon>medication</mat-icon>{{ m.name }} {{ m.dosage }} — {{ m.frequency }}</span>
+          }
+        </div>
+        @if (rx.notes) {
+          <div class="rx-notes">{{ rx.notes }}</div>
+        }
+      </div>
+    }
+  </div>
+}

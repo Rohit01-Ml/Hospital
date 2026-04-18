@@ -1,0 +1,55 @@
+<div class="layout" [class.collapsed]="!sidebarOpen()">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <mat-icon>local_hospital</mat-icon>
+        <span class="brand-name">MediCare<strong>+</strong></span>
+      </div>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <mat-icon>{{ sidebarOpen() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <div class="doctor-badge">
+      <mat-icon>stethoscope</mat-icon>
+      <span class="badge-text">Doctor Portal</span>
+    </div>
+
+    <div class="user-info">
+      <div class="user-avatar">{{ auth.user()?.name?.[0] }}</div>
+      <div class="user-details">
+        <span class="user-name">{{ auth.user()?.name }}</span>
+        <span class="user-role">Physician</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems; track item.route) {
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.badge && waitingCount() > 0) {
+            <span class="nav-badge">{{ waitingCount() }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <button class="logout-btn" (click)="auth.logout()">
+      <mat-icon>logout</mat-icon>
+      <span class="nav-label">Logout</span>
+    </button>
+  </aside>
+
+  <main class="main-content">
+    <div class="top-bar">
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span class="live-text">Live Queue</span>
+      </div>
+    </div>
+    <div class="page-wrap">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

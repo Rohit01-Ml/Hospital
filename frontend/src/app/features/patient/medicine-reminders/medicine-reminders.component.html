@@ -1,0 +1,123 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>medication</mat-icon> Medicine Reminders</h1>
+      <p class="page-subtitle">Manage your medication schedule</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openAdd()">
+      <mat-icon>add</mat-icon> Add Reminder
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>{{ editingId() ? 'Edit' : 'New' }} Medicine Reminder</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="reminder-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Medicine Name</mat-label>
+              <input matInput formControlName="medicine_name" placeholder="e.g., Paracetamol">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Dosage</mat-label>
+              <input matInput formControlName="dosage" placeholder="e.g., 500mg">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Frequency</mat-label>
+              <mat-select formControlName="frequency">
+                @for (f of frequencyOptions; track f) {
+                  <mat-option [value]="f">{{ f }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Reminder Times</mat-label>
+              <mat-select formControlName="times" multiple>
+                @for (t of timeOptions; track t) {
+                  <mat-option [value]="t">{{ t }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Start Date</mat-label>
+              <input matInput type="date" formControlName="start_date">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>End Date (optional)</mat-label>
+              <input matInput type="date" formControlName="end_date">
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Instructions</mat-label>
+            <textarea matInput formControlName="instructions" rows="2" placeholder="Take after meals, with water..."></textarea>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+              @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+              @else { <mat-icon>save</mat-icon> Save Reminder }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (reminders().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">medication</mat-icon>
+      <h3>No Reminders Set</h3>
+      <p>Add medicine reminders to stay on track with your medications.</p>
+    </div>
+  } @else {
+    <div class="reminders-grid">
+      @for (r of reminders(); track r.id) {
+        <mat-card class="reminder-card" [class.inactive]="!r.active">
+          <mat-card-header>
+            <div mat-card-avatar class="med-avatar" [class.active]="r.active">
+              <mat-icon>medication</mat-icon>
+            </div>
+            <mat-card-title>{{ r.medicine_name }}</mat-card-title>
+            <mat-card-subtitle>{{ r.dosage }} &bull; {{ r.frequency }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="times-chips">
+              @for (t of r.times; track t) {
+                <mat-chip><mat-icon class="tiny-icon">alarm</mat-icon> {{ t }}</mat-chip>
+              }
+            </div>
+            <div class="date-range">
+              <mat-icon class="tiny-icon">date_range</mat-icon>
+              {{ r.start_date | date:'mediumDate' }}
+              @if (r.end_date) { — {{ r.end_date | date:'mediumDate' }} }
+              @else { (ongoing) }
+            </div>
+            @if (r.instructions) {
+              <p class="instructions-text">{{ r.instructions }}</p>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <mat-slide-toggle [checked]="r.active" (change)="toggle(r)" color="primary">
+              {{ r.active ? 'Active' : 'Inactive' }}
+            </mat-slide-toggle>
+            <button mat-icon-button color="primary" (click)="edit(r)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(r.id)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

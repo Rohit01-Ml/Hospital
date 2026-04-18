@@ -1,0 +1,76 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>payment</mat-icon> Payments</h1>
+      <p class="page-subtitle">Manage your appointment payments</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else {
+    <div class="stats-row">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon paid"><mat-icon>check_circle</mat-icon></div>
+          <div class="stat-value">₹{{ totalPaid() }}</div>
+          <div class="stat-label">Total Paid</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon pending"><mat-icon>schedule</mat-icon></div>
+          <div class="stat-value">{{ pendingCount() }}</div>
+          <div class="stat-label">Pending Payments</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon total"><mat-icon>receipt_long</mat-icon></div>
+          <div class="stat-value">{{ payments().length }}</div>
+          <div class="stat-label">Total Transactions</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    @if (payments().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">payment</mat-icon>
+        <h3>No Payment Records</h3>
+        <p>Payments will appear here after you book appointments.</p>
+      </div>
+    } @else {
+      <div class="payments-list">
+        @for (p of payments(); track p.id) {
+          <mat-card class="payment-card">
+            <div class="payment-row">
+              <div class="payment-icon" [style.color]="statusColor(p.status)">
+                <mat-icon>{{ statusIcon(p.status) }}</mat-icon>
+              </div>
+              <div class="payment-info">
+                <div class="payment-id">Appointment #{{ p.appointment_id.slice(-6) }}</div>
+                <div class="payment-date">{{ p.created_at | date:'medium' }}</div>
+                @if (p.method) {
+                  <div class="payment-method"><mat-icon class="tiny-icon">credit_card</mat-icon> {{ p.method }}</div>
+                }
+              </div>
+              <div class="payment-amount">₹{{ p.amount }}</div>
+              <div class="payment-status" [style.color]="statusColor(p.status)">
+                <mat-icon>{{ statusIcon(p.status) }}</mat-icon>
+                {{ p.status | titlecase }}
+              </div>
+              @if (p.status === 'pending') {
+                <button mat-raised-button color="primary"
+                  [disabled]="paying() === p.id"
+                  (click)="mockPay(p.appointment_id, p.id)">
+                  @if (paying() === p.id) { <mat-spinner diameter="18"></mat-spinner> }
+                  @else { <mat-icon>payment</mat-icon> Pay Now }
+                </button>
+              }
+            </div>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

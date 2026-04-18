@@ -1,0 +1,115 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>psychology</mat-icon> AI Symptom Checker</h1>
+      <p class="page-subtitle">Describe your symptoms and get an instant specialization recommendation</p>
+    </div>
+  </div>
+
+  <!-- Input Card -->
+  <mat-card class="input-card">
+    <mat-card-content>
+      <div class="disclaimer">
+        <mat-icon>info</mat-icon>
+        <span>This is an AI-based guide only. Always consult a doctor for a proper diagnosis.</span>
+      </div>
+
+      <mat-form-field appearance="outline" class="symptoms-field">
+        <mat-label>Describe your symptoms</mat-label>
+        <textarea matInput [(ngModel)]="symptoms" rows="4"
+          placeholder="e.g. I have a persistent headache, fever since 2 days and feel nauseous..."></textarea>
+        <mat-icon matPrefix>edit_note</mat-icon>
+        <mat-hint>Be as descriptive as possible for accurate results</mat-hint>
+      </mat-form-field>
+
+      <div class="quick-chips">
+        <span class="chips-label">Quick add:</span>
+        @for (s of quickSymptoms; track s) {
+          <button mat-stroked-button class="chip-btn" (click)="addQuick(s)">{{ s }}</button>
+        }
+      </div>
+
+      <div class="actions">
+        <button mat-button (click)="reset()" [disabled]="!symptoms && !result()">
+          <mat-icon>refresh</mat-icon> Reset
+        </button>
+        <button mat-raised-button color="primary" (click)="check()"
+          [disabled]="!symptoms.trim() || loading()">
+          @if (loading()) {
+            <mat-spinner diameter="18" style="display:inline-block;margin-right:8px"></mat-spinner> Analyzing...
+          } @else {
+            <mat-icon>search</mat-icon> Analyze Symptoms
+          }
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon> {{ error() }}
+    </div>
+  }
+
+  <!-- Results -->
+  @if (result()) {
+    <div class="results-section">
+      <h2 class="results-title"><mat-icon>biotech</mat-icon> Analysis Results</h2>
+
+      <div class="suggestions-grid">
+        @for (s of result()!.suggestions; track s.specialization; let i = $index) {
+          <mat-card class="suggestion-card" [class.top-match]="i === 0">
+            @if (i === 0) {
+              <div class="best-badge"><mat-icon>star</mat-icon> Best Match</div>
+            }
+            <mat-card-content>
+              <div class="spec-header">
+                <div class="spec-icon" [style.background-color]="confidenceColor(s.confidence)">
+                  <mat-icon>local_hospital</mat-icon>
+                </div>
+                <div class="spec-info">
+                  <div class="spec-name">{{ s.specialization }}</div>
+                  <div class="confidence-label" [style.color]="confidenceColor(s.confidence)">
+                    {{ confidenceLabel(s.confidence) }}
+                  </div>
+                </div>
+                <div class="confidence-pct" [style.color]="confidenceColor(s.confidence)">
+                  {{ confidencePct(s.confidence) }}%
+                </div>
+              </div>
+
+              <div class="confidence-bar">
+                <div class="confidence-fill"
+                  [style.width.%]="confidencePct(s.confidence)"
+                  [style.background-color]="confidenceColor(s.confidence)">
+                </div>
+              </div>
+
+              @if (s.matched_keywords && s.matched_keywords.length) {
+                <div class="matched-symptoms">
+                  <span class="match-label">Matched symptoms:</span>
+                  @for (sym of s.matched_keywords; track sym) {
+                    <span class="sym-tag"><mat-icon class="tiny-icon">check</mat-icon> {{ sym }}</span>
+                  }
+                </div>
+              }
+
+              @if (i === 0) {
+                <a mat-raised-button color="primary" routerLink="/patient/book" class="book-btn">
+                  <mat-icon>add_circle</mat-icon> Book Appointment
+                </a>
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+      @if (result()!.disclaimer) {
+        <div class="result-disclaimer">
+          <mat-icon>warning_amber</mat-icon> {{ result()!.disclaimer }}
+        </div>
+      }
+    </div>
+  }
+</div>

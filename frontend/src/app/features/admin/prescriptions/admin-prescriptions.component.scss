@@ -1,0 +1,26 @@
+.page-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: #1565c0; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.page-title mat-icon { font-size: 2rem; height: 2rem; width: 2rem; }
+.page-subtitle { color: #666; margin: 0; }
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+.form-card { border-radius: 12px; margin-bottom: 24px; }
+.rx-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: flex; gap: 16px; }
+.flex-1 { flex: 1; } .flex-2 { flex: 2; }
+.full-width { width: 100%; }
+.medicines-section { border: 1px solid #e3f2fd; border-radius: 8px; padding: 16px; }
+.medicines-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; h3 { margin: 0; color: #1565c0; } }
+.medicine-form-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 8px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.rx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+.rx-card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #1565c0; }
+.rx-avatar { background: #e3f2fd; display: flex; align-items: center; justify-content: center; mat-icon { color: #1565c0; } }
+.patient-label { font-size: 0.82rem; color: #888; margin-bottom: 6px; }
+.medicines-count { font-size: 0.85rem; font-weight: 600; color: #1565c0; margin-bottom: 8px; }
+.med-list { display: flex; flex-direction: column; gap: 4px; }
+.med-pill { display: flex; align-items: center; gap: 4px; font-size: 0.82rem; color: #444; }
+.followup { margin-top: 8px; font-size: 0.82rem; color: #2e7d32; }
+.tiny-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; color: #aaa; text-align: center; }
+.empty-icon { font-size: 5rem; height: 5rem; width: 5rem; color: #ddd; margin-bottom: 16px; }

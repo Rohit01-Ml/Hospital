@@ -1,0 +1,25 @@
+.page-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: #1565c0; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.page-title mat-icon { font-size: 2rem; height: 2rem; width: 2rem; }
+.page-subtitle { color: #666; margin: 0; }
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+.form-card { border-radius: 12px; margin-bottom: 24px; }
+.test-form { display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: flex; gap: 16px; }
+.flex-1 { flex: 1; } .flex-2 { flex: 2; }
+.full-width { width: 100%; }
+.form-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.table-card { border-radius: 12px; }
+.full-table { width: 100%; }
+.muted { color: #888; font-size: 0.8rem; }
+.bookings-list { display: flex; flex-direction: column; gap: 12px; }
+.booking-row { display: flex; align-items: center; gap: 16px; padding: 12px; background: #f9f9f9; border-radius: 8px; }
+.booking-info { flex: 1; }
+.booking-test { font-weight: 600; }
+.booking-meta { font-size: 0.82rem; color: #888; }
+.booking-badges { display: flex; gap: 6px; }
+.status-pill { padding: 3px 10px; border-radius: 12px; color: white; font-size: 0.78rem; font-weight: 600; }
+.pay-pill { padding: 3px 10px; border-radius: 12px; background: #ff9800; color: white; font-size: 0.78rem; font-weight: 600; &.paid { background: #4caf50; } }
+.status-select { width: 160px; font-size: 0.85rem; }
+.empty { text-align: center; padding: 40px; color: #aaa; }

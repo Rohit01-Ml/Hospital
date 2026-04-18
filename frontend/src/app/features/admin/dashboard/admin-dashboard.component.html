@@ -1,0 +1,62 @@
+<div class="page-header">
+  <h2>Admin Dashboard</h2>
+  <p>Hospital operations overview for today.</p>
+</div>
+
+@if (loading()) { <div class="loading-center"><mat-spinner></mat-spinner></div> }
+
+<div class="stats-grid">
+  @for (stat of stats; track stat.label) {
+    <a class="stat-card" [style.--c]="stat.color" [routerLink]="stat.route">
+      <div class="stat-icon"><mat-icon>{{ stat.icon }}</mat-icon></div>
+      <div>
+        <div class="stat-val">{{ stat.value }}</div>
+        <div class="stat-lbl">{{ stat.label }}</div>
+      </div>
+    </a>
+  }
+</div>
+
+<div class="quick-actions">
+  <h3>Quick Actions</h3>
+  <div class="action-grid">
+    <a routerLink="/admin/doctors" class="action-btn"><mat-icon>person_add</mat-icon> Doctors</a>
+    <a routerLink="/admin/specializations" class="action-btn"><mat-icon>add_circle</mat-icon> Specializations</a>
+    <a routerLink="/admin/queue" class="action-btn accent"><mat-icon>queue</mat-icon> Queue</a>
+    <a routerLink="/admin/lab-tests" class="action-btn"><mat-icon>biotech</mat-icon> Lab Tests</a>
+    <a routerLink="/admin/reports" class="action-btn"><mat-icon>assessment</mat-icon> Reports</a>
+    <a routerLink="/admin/prescriptions" class="action-btn"><mat-icon>description</mat-icon> Prescriptions</a>
+    <a routerLink="/admin/notifications" class="action-btn accent"><mat-icon>campaign</mat-icon> Notifications</a>
+  </div>
+</div>
+
+@if (todayApts().length > 0) {
+  <div class="section-heading">
+    <h3>Today's Appointments</h3>
+    <a routerLink="/admin/queue" mat-stroked-button color="primary">View Queue</a>
+  </div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Doctor</th>
+          <th>Specialization</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (apt of todayApts(); track apt.id) {
+          <tr>
+            <td><strong>#{{ apt.token_number }}</strong></td>
+            <td>{{ apt.doctor?.name }}</td>
+            <td>{{ apt.specialization?.name }}</td>
+            <td>{{ apt.time_slot }}</td>
+            <td><span class="badge {{ statusClass(apt.status) }}">{{ apt.status.replace('_',' ') }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

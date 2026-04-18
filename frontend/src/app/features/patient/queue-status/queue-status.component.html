@@ -1,0 +1,99 @@
+<div class="page-header flex justify-between items-center">
+  <div>
+    <h2>Live Queue Status</h2>
+    <p>Updates every 15 seconds automatically.</p>
+  </div>
+  <a routerLink="/patient/dashboard" mat-stroked-button>
+    <mat-icon>arrow_back</mat-icon> Back
+  </a>
+</div>
+
+@if (loading()) { <div class="loading-center"><mat-spinner></mat-spinner></div> }
+
+@if (myStatus() && !loading()) {
+  <!-- My Token Card -->
+  <div class="status-grid">
+    <div class="big-token-card" [class.my-turn]="myStatus()!.patients_ahead === 0 && myStatus()!.status !== 'completed'">
+      <div class="bt-label">Your Token</div>
+      <div class="bt-number">#{{ myStatus()!.my_token }}</div>
+      <span class="badge {{ myStatus()!.status.replace('_','-') }}">
+        {{ myStatus()!.status.replace('_',' ') }}
+      </span>
+      @if (myStatus()!.patients_ahead === 0 && myStatus()!.status === 'waiting') {
+        <div class="your-turn-msg"><mat-icon>notifications_active</mat-icon> Your turn is next!</div>
+      }
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <mat-icon>queue</mat-icon>
+        <span class="info-val">{{ myStatus()!.current_token }}</span>
+        <span class="info-lbl">Now Serving</span>
+      </div>
+      <div class="info-card highlight">
+        <mat-icon>people</mat-icon>
+        <span class="info-val">{{ myStatus()!.patients_ahead }}</span>
+        <span class="info-lbl">People Ahead</span>
+      </div>
+      <div class="info-card est-wait" [class.urgent]="myStatus()!.patients_ahead === 0 && myStatus()!.status === 'waiting'">
+        <mat-icon>schedule</mat-icon>
+        <span class="info-val">
+          @if (myStatus()!.status === 'in_progress') {
+            Now!
+          } @else if (myStatus()!.patients_ahead === 0 && myStatus()!.status === 'waiting') {
+            Next ⚡
+          } @else {
+            ~{{ formatWait(myStatus()!.estimated_wait_minutes) }}
+          }
+        </span>
+        <span class="info-lbl">Est. Wait</span>
+      </div>
+      <div class="info-card">
+        <mat-icon>timer</mat-icon>
+        <span class="info-val">{{ myStatus()!.avg_consult_minutes }}m</span>
+        <span class="info-lbl">Avg / Patient</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  @if (queue()) {
+    <div class="progress-section">
+      <div class="progress-header">
+        <span>Queue Progress</span>
+        <span>{{ queue()!.current_token }} / {{ queue()!.total_patients }} patients</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" [style.width.%]="progressPct"></div>
+      </div>
+    </div>
+
+    <!-- Queue List -->
+    <div class="queue-list-section">
+      <h3>Today's Queue</h3>
+      <div class="queue-list">
+        @for (apt of queue()!.appointments; track apt.id) {
+          <div class="queue-item" [class.mine]="apt.id === myStatus()!.appointment.id" [class.current]="apt.status === 'in_progress'">
+            <div class="q-token" [class.current]="apt.status === 'in_progress'">#{{ apt.token_number }}</div>
+            <div class="q-info">
+              <span class="q-time">{{ apt.time_slot }}</span>
+              @if (apt.id === myStatus()!.appointment.id) { <span class="you-label">You</span> }
+            </div>
+            @if (apt.status === 'waiting' && apt.estimated_wait_minutes > 0) {
+              <span class="q-wait">~{{ formatWait(apt.estimated_wait_minutes) }}</span>
+            }
+            <span class="badge {{ apt.status.replace('_','-') }}">{{ apt.status.replace('_',' ') }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+}
+
+@if (!myStatus() && !loading()) {
+  <div class="empty-state">
+    <mat-icon>event_busy</mat-icon>
+    <h3>No appointment found for today</h3>
+    <a routerLink="/patient/book" mat-flat-button color="primary">Book Appointment</a>
+  </div>
+}

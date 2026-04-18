@@ -1,0 +1,173 @@
+<div class="page-header">
+  <h2>Book an Appointment</h2>
+  <p>Follow the steps to schedule your visit with a specialist.</p>
+</div>
+
+<!-- Progress Steps -->
+<div class="steps-bar">
+  @for (s of ['Specialization','Doctor','Date & Time','Review & Pay']; track s; let i = $index) {
+    <div class="step-item" [class.active]="i === step()" [class.done]="i < step()">
+      <div class="step-num">
+        @if (i < step()) { <mat-icon>check</mat-icon> }
+        @else { {{ i + 1 }} }
+      </div>
+      <span>{{ s }}</span>
+    </div>
+    @if (i < 3) { <div class="step-line" [class.done]="i < step()"></div> }
+  }
+</div>
+
+@if (loading() && payStatus() === 'idle') {
+  <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+}
+
+<!-- Step 0: Specialization -->
+@if (step() === 0 && !loading()) {
+  <div class="step-content">
+    <h3>Choose a Specialization</h3>
+    <div class="spec-grid">
+      @for (spec of specializations(); track spec.id) {
+        <button class="spec-card" [class.selected]="selectedSpec()?.id === spec.id" (click)="selectSpec(spec)">
+          <span class="material-icons spec-icon">{{ spec.icon }}</span>
+          <strong>{{ spec.name }}</strong>
+          <p>{{ spec.description }}</p>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<!-- Step 1: Doctor -->
+@if (step() === 1 && !loading()) {
+  <div class="step-content">
+    <h3>Choose a Doctor <span class="sub">in {{ selectedSpec()?.name }}</span></h3>
+    <div class="doc-grid">
+      @for (doc of doctors(); track doc.id) {
+        <button class="doc-card" [class.selected]="selectedDoctor()?.id === doc.id" (click)="selectDoctor(doc)">
+          <div class="doc-avatar">{{ doc.name[0] }}</div>
+          <div class="doc-info">
+            <strong>{{ doc.name }}</strong>
+            <span>{{ doc.qualification }}</span>
+            <span>{{ doc.experience_years }} yrs exp</span>
+          </div>
+          <div class="doc-rating">
+            <mat-icon>star</mat-icon> {{ doc.rating }}
+          </div>
+        </button>
+      }
+    </div>
+    <button mat-stroked-button (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
+  </div>
+}
+
+<!-- Step 2: Date & Time -->
+@if (step() === 2 && !loading()) {
+  <div class="step-content">
+    <h3>Choose Date & Time</h3>
+    <div class="datetime-section">
+      <div class="date-picker">
+        <label class="field-label"><mat-icon>calendar_today</mat-icon> Select Date</label>
+        <input type="date" [min]="minDate" [ngModel]="selectedDate()" (ngModelChange)="onDateChange($event)" class="date-input">
+      </div>
+
+      @if (selectedDate() && slots().length > 0) {
+        <div class="slots-section">
+          <p class="slots-label">Available Time Slots</p>
+          <div class="slots-grid">
+            @for (slot of slots(); track slot.time) {
+              <button class="slot-btn" [class.selected]="selectedSlot() === slot.time"
+                      [disabled]="!slot.available" (click)="selectSlot(slot.time)">
+                {{ slot.time }}
+                @if (!slot.available) { <span class="booked-label">Booked</span> }
+              </button>
+            }
+          </div>
+        </div>
+      }
+      @if (selectedDate() && slots().length === 0) {
+        <p class="no-slots">No slots available on this day. Try another date.</p>
+      }
+    </div>
+    <div class="step-actions">
+      <button mat-stroked-button (click)="goBack()"><mat-icon>arrow_back</mat-icon> Back</button>
+      <button mat-flat-button color="primary" [disabled]="!selectedSlot()" (click)="step.set(3)">
+        Continue <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Step 3: Review & Pay -->
+@if (step() === 3) {
+  <div class="step-content">
+    <h3>Review & Pay</h3>
+
+    <div class="confirm-card">
+      <div class="confirm-row">
+        <mat-icon>local_hospital</mat-icon>
+        <div><label>Specialization</label><span>{{ selectedSpec()?.name }}</span></div>
+      </div>
+      <div class="confirm-row">
+        <mat-icon>person</mat-icon>
+        <div>
+          <label>Doctor</label>
+          <span>{{ selectedDoctor()?.name }}</span>
+          <small>{{ selectedDoctor()?.qualification }}</small>
+        </div>
+      </div>
+      <div class="confirm-row">
+        <mat-icon>calendar_today</mat-icon>
+        <div><label>Date</label><span>{{ selectedDate() }}</span></div>
+      </div>
+      <div class="confirm-row">
+        <mat-icon>schedule</mat-icon>
+        <div><label>Time</label><span>{{ selectedSlot() }}</span></div>
+      </div>
+      <div class="notes-row">
+        <label>Notes (optional)</label>
+        <textarea rows="3" placeholder="Describe your symptoms or reason for visit..." [ngModel]="notes()" (ngModelChange)="notes.set($event)" class="notes-input"></textarea>
+      </div>
+    </div>
+
+    <!-- Fee Summary -->
+    <div class="fee-box">
+      <div class="fee-row">
+        <span>Consultation Fee</span>
+        <span class="fee-amount">₹{{ fee() }}</span>
+      </div>
+      <div class="fee-row fee-total">
+        <span>Total Payable</span>
+        <strong class="fee-amount">₹{{ fee() }}</strong>
+      </div>
+      <p class="fee-note">
+        <mat-icon>lock</mat-icon>
+        Secure payment powered by Razorpay. UPI, cards, net banking accepted.
+      </p>
+    </div>
+
+    <!-- Pay status overlays -->
+    @if (payStatus() === 'booking') {
+      <div class="pay-status"><mat-spinner diameter="22"></mat-spinner> Creating appointment...</div>
+    }
+    @if (payStatus() === 'paying') {
+      <div class="pay-status"><mat-spinner diameter="22"></mat-spinner> Opening payment gateway...</div>
+    }
+    @if (payStatus() === 'verifying') {
+      <div class="pay-status"><mat-spinner diameter="22"></mat-spinner> Verifying payment...</div>
+    }
+
+    <div class="step-actions">
+      <button mat-stroked-button (click)="goBack()" [disabled]="loading()">
+        <mat-icon>arrow_back</mat-icon> Back
+      </button>
+      <button class="pay-btn" (click)="confirm()" [disabled]="loading()">
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <mat-icon>payment</mat-icon>
+          Pay ₹{{ fee() }} & Confirm
+        }
+      </button>
+    </div>
+  </div>
+}

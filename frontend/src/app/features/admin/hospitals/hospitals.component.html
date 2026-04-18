@@ -1,0 +1,142 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>business</mat-icon> Hospital Tenants</h1>
+      <p class="page-subtitle">Manage SaaS tenants and their subscription plans</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openNew()">
+      <mat-icon>add</mat-icon> Add Hospital
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Register New Hospital</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="h-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-2">
+              <mat-label>Hospital Name</mat-label>
+              <input matInput formControlName="name" placeholder="City General Hospital">
+              <mat-icon matPrefix>local_hospital</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Subdomain</mat-label>
+              <input matInput formControlName="subdomain" placeholder="citygen">
+              <mat-icon matPrefix>language</mat-icon>
+              <mat-hint>citygen.hms.app</mat-hint>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address" placeholder="123 Medical Street, City">
+            <mat-icon matPrefix>location_on</mat-icon>
+          </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone">
+              <mat-icon matPrefix>phone</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email">
+              <mat-icon matPrefix>email</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="flex-1">
+              <mat-label>Plan</mat-label>
+              <mat-select formControlName="plan">
+                @for (p of plans(); track p.key) {
+                  <mat-option [value]="p.key">{{ p.name }} — ₹{{ p.price }}/mo</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>workspace_premium</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancel()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+              @if (saving()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>save</mat-icon> Register Hospital }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Plans Info -->
+  @if (!loading() && plans().length) {
+    <div class="plans-row">
+      @for (p of plans(); track p.key) {
+        <div class="plan-chip" [style.border-color]="planColor(p.key)">
+          <mat-icon [style.color]="planColor(p.key)">workspace_premium</mat-icon>
+          <div>
+            <div class="plan-name" [style.color]="planColor(p.key)">{{ p.name }}</div>
+            <div class="plan-price">₹{{ p.price }}/mo</div>
+          </div>
+          <div class="plan-features">
+            <span>{{ p.max_doctors }} doctors</span>
+            <span>{{ p.max_patients }} patients</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (hospitals().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">business</mat-icon>
+      <h3>No Hospitals Registered</h3>
+      <p>Click "Add Hospital" to onboard a new tenant.</p>
+    </div>
+  } @else {
+    <div class="hospitals-grid">
+      @for (h of hospitals(); track h.id) {
+        <mat-card class="hospital-card">
+          <mat-card-content>
+            <div class="h-header">
+              <div class="h-avatar">{{ h.name[0] }}</div>
+              <div class="h-info">
+                <div class="h-name">{{ h.name }}</div>
+                <div class="h-subdomain">{{ h.subdomain }}.hms.app</div>
+              </div>
+              <div class="plan-badge" [style.background-color]="planColor(h.plan)">
+                {{ planLabel(h.plan) }}
+              </div>
+            </div>
+
+            <mat-divider class="divider"></mat-divider>
+
+            <div class="h-details">
+              <div class="h-detail"><mat-icon class="d-icon">location_on</mat-icon> {{ h.address }}</div>
+              <div class="h-detail"><mat-icon class="d-icon">phone</mat-icon> {{ h.phone }}</div>
+              <div class="h-detail"><mat-icon class="d-icon">email</mat-icon> {{ h.email }}</div>
+              @if (h.active_since) {
+                <div class="h-detail"><mat-icon class="d-icon">event</mat-icon> Since {{ h.active_since | date:'mediumDate' }}</div>
+              }
+            </div>
+
+            @if (h.features) {
+              <div class="features-row">
+                @if (h.features.ai_features) {
+                  <span class="feat-tag"><mat-icon class="tiny-icon">psychology</mat-icon> AI</span>
+                }
+                @if (h.features.websocket) {
+                  <span class="feat-tag"><mat-icon class="tiny-icon">bolt</mat-icon> Live Queue</span>
+                }
+                @if (h.features.whatsapp) {
+                  <span class="feat-tag"><mat-icon class="tiny-icon">message</mat-icon> WhatsApp</span>
+                }
+                @if (h.features.custom_domain) {
+                  <span class="feat-tag"><mat-icon class="tiny-icon">language</mat-icon> Custom Domain</span>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

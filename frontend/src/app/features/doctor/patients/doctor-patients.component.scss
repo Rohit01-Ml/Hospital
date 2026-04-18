@@ -1,0 +1,127 @@
+.page-container { max-width: 1100px; margin: 0 auto; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #4a148c;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    mat-icon { font-size: 30px; width: 30px; height: 30px; }
+  }
+
+  .page-subtitle { margin: 0; font-size: 13px; color: #666; }
+}
+
+.search-bar {
+  margin-bottom: 20px;
+
+  .search-field { width: 100%; max-width: 420px; }
+}
+
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.patient-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  transition: transform .2s, box-shadow .2s;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(123,31,162,.12);
+  }
+
+  .pat-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7b1fa2, #e040fb);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .pat-info {
+    flex: 1;
+    min-width: 0;
+
+    .pat-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #212121;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pat-email {
+      font-size: 12px;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    .pat-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 6px;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 11px;
+        color: #7b1fa2;
+        font-weight: 500;
+        background: #f3e5f5;
+        border-radius: 6px;
+        padding: 2px 8px;
+
+        .tiny-icon { font-size: 13px; width: 13px; height: 13px; }
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: #aaa;
+  grid-column: 1 / -1;
+
+  .empty-icon { font-size: 60px; width: 60px; height: 60px; opacity: .3; }
+  h3 { margin: 14px 0 0; font-size: 18px; }
+}
+
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 64px;
+}

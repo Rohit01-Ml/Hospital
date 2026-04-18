@@ -1,0 +1,57 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>assessment</mat-icon> My Reports</h1>
+      <p class="page-subtitle">View your medical and lab reports</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else if (reports().length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">assessment</mat-icon>
+      <h3>No Reports Available</h3>
+      <p>Reports will appear here once your lab tests are processed.</p>
+    </div>
+  } @else {
+    <div class="cards-grid">
+      @for (r of reports(); track r.id) {
+        <mat-card class="report-card" [class.critical]="r.status === 'critical'" [class.abnormal]="r.status === 'abnormal'">
+          <mat-card-header>
+            <div mat-card-avatar class="report-avatar" [style.background-color]="statusColor(r.status)">
+              <mat-icon>{{ statusIcon(r.status) }}</mat-icon>
+            </div>
+            <mat-card-title>{{ r.title }}</mat-card-title>
+            <mat-card-subtitle>{{ r.created_at | date:'mediumDate' }} &bull; {{ r.uploaded_by }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="status-badge" [style.background-color]="statusColor(r.status)">
+              <mat-icon>{{ statusIcon(r.status) }}</mat-icon>
+              {{ r.status | titlecase }}
+            </div>
+            @if (r.findings) {
+              <div class="findings-block">
+                <strong>Findings:</strong>
+                <p>{{ r.findings }}</p>
+              </div>
+            }
+            @if (r.interpretation) {
+              <div class="interpretation-block">
+                <strong>Interpretation:</strong>
+                <p>{{ r.interpretation }}</p>
+              </div>
+            }
+          </mat-card-content>
+          @if (r.file_url) {
+            <mat-card-actions>
+              <button mat-stroked-button color="primary" (click)="download(r.id)">
+                <mat-icon>download</mat-icon> Download Report
+              </button>
+            </mat-card-actions>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+</div>

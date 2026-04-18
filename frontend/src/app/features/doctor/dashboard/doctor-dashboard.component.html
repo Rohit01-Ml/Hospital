@@ -1,0 +1,79 @@
+<div class="dash-header">
+  <div class="greet-block">
+    <h2>Good {{ timeOfDay() }}, <span class="doc-name">{{ auth.user()?.name }}</span></h2>
+    <p class="greet-sub">{{ today }}</p>
+  </div>
+  <a routerLink="/doctor/queue" class="queue-cta">
+    <mat-icon>queue</mat-icon> Open Queue
+  </a>
+</div>
+
+@if (loading()) {
+  <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+} @else {
+
+  <!-- Stats Row -->
+  <div class="stats-grid">
+    @for (stat of stats; track stat.label) {
+      <a class="stat-card" [style.--c]="stat.color" [routerLink]="stat.route">
+        <mat-icon>{{ stat.icon }}</mat-icon>
+        <div class="stat-body">
+          <div class="stat-val">{{ stat.value }}</div>
+          <div class="stat-lbl">{{ stat.label }}</div>
+        </div>
+      </a>
+    }
+  </div>
+
+  <!-- Queue Progress -->
+  @if (queue()) {
+    <div class="queue-progress-card">
+      <div class="qp-top">
+        <div class="qp-title"><mat-icon>linear_scale</mat-icon> Queue Progress</div>
+        <span class="qp-pct">{{ progressPct }}% complete</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressPct"></div>
+      </div>
+      <div class="qp-chips">
+        <span class="chip waiting"><mat-icon>hourglass_empty</mat-icon>{{ queue()?.waiting }} Waiting</span>
+        <span class="chip inprog"><mat-icon>medical_services</mat-icon>{{ queue()?.in_progress }} In Progress</span>
+        <span class="chip done"><mat-icon>check_circle</mat-icon>{{ queue()?.completed }} Done</span>
+      </div>
+    </div>
+  }
+
+  <!-- Today's Patients -->
+  <div class="section-row">
+    <h3 class="section-title"><mat-icon>people</mat-icon> Today's Patients</h3>
+    <a routerLink="/doctor/appointments" class="see-all">View All <mat-icon>chevron_right</mat-icon></a>
+  </div>
+
+  @if (todayApts().length === 0) {
+    <div class="empty-state">
+      <mat-icon>event_available</mat-icon>
+      <p>No appointments today</p>
+    </div>
+  } @else {
+    <div class="apts-grid">
+      @for (apt of todayApts(); track apt.id) {
+        <div class="apt-card">
+          <div class="apt-card-left">
+            <div class="pat-avatar">{{ apt.patient?.name?.[0] || '#' }}</div>
+          </div>
+          <div class="apt-card-body">
+            <div class="pat-name">{{ apt.patient?.name || 'Patient' }}</div>
+            <div class="apt-meta">
+              <span class="token-chip">#{{ apt.token_number }}</span>
+              <span class="time-str">{{ apt.time_slot }}</span>
+            </div>
+            @if (apt.notes) { <div class="apt-notes">{{ apt.notes }}</div> }
+          </div>
+          <div class="apt-card-right">
+            <span class="status-badge status-{{ apt.status?.replace('_','-') }}">{{ apt.status?.replace('_',' ') | titlecase }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}

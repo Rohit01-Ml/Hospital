@@ -1,0 +1,94 @@
+<div class="page-header flex justify-between items-center">
+  <div>
+    <h2>Doctors</h2>
+    <p>Manage your hospital's medical staff.</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="openAdd()">
+    <mat-icon>person_add</mat-icon> Add Doctor
+  </button>
+</div>
+
+@if (loading()) { <div class="loading-center"><mat-spinner></mat-spinner></div> }
+
+<!-- Form Panel -->
+@if (showForm()) {
+  <div class="form-panel">
+    <div class="form-panel-header">
+      <h3>{{ editingDoc() ? 'Edit Doctor' : 'Add New Doctor' }}</h3>
+      <button mat-icon-button (click)="closeForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Full Name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Specialization</mat-label>
+        <mat-select formControlName="specialization_id">
+          @for (s of specs(); track s.id) {
+            <mat-option [value]="s.id">{{ s.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Qualification</mat-label>
+        <input matInput formControlName="qualification" placeholder="MD, FACC">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Experience (years)</mat-label>
+        <input matInput type="number" formControlName="experience_years">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Bio</mat-label>
+        <textarea matInput rows="3" formControlName="bio"></textarea>
+      </mat-form-field>
+      <div class="form-actions span-2">
+        <mat-slide-toggle formControlName="available">Available</mat-slide-toggle>
+        <div class="btns">
+          <button mat-stroked-button type="button" (click)="closeForm()">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+            @if (submitting()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { {{ editingDoc() ? 'Update' : 'Add Doctor' }} }
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+}
+
+<!-- Doctors Grid -->
+<div class="doctors-grid">
+  @for (doc of doctors(); track doc.id) {
+    <div class="doc-card">
+      <div class="doc-card-header">
+        <div class="doc-avatar">{{ doc.name[0] }}</div>
+        <div class="doc-badge-row">
+          <span class="badge {{ doc.available ? 'completed' : 'cancelled' }}">
+            {{ doc.available ? 'Available' : 'Unavailable' }}
+          </span>
+          <span class="exp-badge">{{ doc.experience_years }} yrs</span>
+        </div>
+      </div>
+      <h3>{{ doc.name }}</h3>
+      <p class="doc-spec">{{ doc.specialization?.name || specName(doc.specialization_id) }}</p>
+      <p class="doc-qual">{{ doc.qualification }}</p>
+      @if (doc.bio) { <p class="doc-bio">{{ doc.bio }}</p> }
+      <div class="doc-meta">
+        <span><mat-icon>star</mat-icon>{{ doc.rating }}/5</span>
+        <span><mat-icon>people</mat-icon>{{ doc.patients_treated }} patients</span>
+      </div>
+      <div class="doc-actions">
+        <button mat-stroked-button (click)="openEdit(doc)"><mat-icon>edit</mat-icon> Edit</button>
+        <button mat-stroked-button color="warn" (click)="delete(doc)"><mat-icon>delete</mat-icon> Delete</button>
+      </div>
+    </div>
+  }
+</div>

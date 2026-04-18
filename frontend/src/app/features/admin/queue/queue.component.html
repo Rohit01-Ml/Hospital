@@ -1,0 +1,196 @@
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><mat-icon>queue</mat-icon> Queue Control</h1>
+      <p class="page-subtitle">Monitor and manage today's patient flow per doctor</p>
+    </div>
+    <div class="header-actions">
+      <span class="refresh-badge">Auto-refresh in {{ countdown() }}s</span>
+      <button mat-stroked-button (click)="loadQueue(); resetCountdown()">
+        <mat-icon>refresh</mat-icon> Refresh Now
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="48"></mat-spinner></div>
+  } @else {
+
+    <!-- Doctor Selector -->
+    <div class="doctor-selector">
+      <label class="selector-label">Select Doctor</label>
+      <div class="doctor-chips">
+        @for (doc of doctors(); track doc.id) {
+          <button class="doc-chip" [class.active]="selectedDoc() === doc.id"
+            (click)="onDoctorChange(doc.id)">
+            <div class="doc-avatar">{{ doc.name[0] }}</div>
+            <div class="doc-text">
+              <span class="doc-name">{{ doc.name }}</span>
+              <span class="doc-spec">{{ doc.specialization?.name }}</span>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (queue()) {
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-box orange">
+          <mat-icon>hourglass_empty</mat-icon>
+          <span class="stat-val">{{ waiting.length }}</span>
+          <span class="stat-lbl">Waiting</span>
+        </div>
+        <div class="stat-box blue">
+          <mat-icon>medical_services</mat-icon>
+          <span class="stat-val">{{ inProgress.length }}</span>
+          <span class="stat-lbl">In Consultation</span>
+        </div>
+        <div class="stat-box green">
+          <mat-icon>check_circle</mat-icon>
+          <span class="stat-val">{{ done.length }}</span>
+          <span class="stat-lbl">Done</span>
+        </div>
+        <div class="stat-box grey">
+          <mat-icon>people</mat-icon>
+          <span class="stat-val">{{ queue()!.total_patients }}</span>
+          <span class="stat-lbl">Total Today</span>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-box">
+          <div class="prog-label">
+            <span>Today's Progress</span>
+            <strong>{{ progressPct }}%</strong>
+          </div>
+          <div class="prog-bar">
+            <div class="prog-fill" [style.width.%]="progressPct"></div>
+          </div>
+          <button mat-raised-button color="primary" class="next-btn"
+            (click)="nextPatient()" [disabled]="acting() || waiting.length === 0">
+            <mat-icon>skip_next</mat-icon>
+            Call Next Patient
+          </button>
+        </div>
+      </div>
+
+      <!-- Kanban Columns -->
+      @if (queue()!.appointments.length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">event_available</mat-icon>
+          <h3>No appointments scheduled today</h3>
+          <p>{{ selectedDoctor?.name }} has no patients in the queue.</p>
+        </div>
+      } @else {
+        <div class="kanban">
+
+          <!-- Waiting Column -->
+          <div class="kanban-col">
+            <div class="col-header orange-header">
+              <mat-icon>hourglass_empty</mat-icon>
+              <span>Waiting</span>
+              <span class="col-count">{{ waiting.length }}</span>
+            </div>
+            @for (apt of waiting; track apt.id) {
+              <div class="patient-card waiting-card">
+                <div class="card-top">
+                  <div class="token-badge orange-badge">#{{ apt.token_number }}</div>
+                  <div class="patient-info">
+                    <div class="p-name">{{ apt.patient?.name || 'Patient' }}</div>
+                    <div class="p-time"><mat-icon class="tiny">schedule</mat-icon> {{ apt.time_slot }}</div>
+                    @if (apt.notes) {
+                      <div class="p-notes">{{ apt.notes }}</div>
+                    }
+                  </div>
+                </div>
+                <div class="card-actions">
+                  <button mat-flat-button color="warn" class="skip-btn"
+                    (click)="skipPatient(apt)" [disabled]="acting()"
+                    matTooltip="Skip this patient">
+                    <mat-icon>skip_next</mat-icon> Skip
+                  </button>
+                </div>
+              </div>
+            }
+            @if (waiting.length === 0) {
+              <div class="col-empty">No patients waiting</div>
+            }
+          </div>
+
+          <!-- In Progress Column -->
+          <div class="kanban-col">
+            <div class="col-header blue-header">
+              <mat-icon>medical_services</mat-icon>
+              <span>In Consultation</span>
+              <span class="col-count">{{ inProgress.length }}</span>
+            </div>
+            @for (apt of inProgress; track apt.id) {
+              <div class="patient-card progress-card">
+                <div class="now-consulting-badge">
+                  <mat-icon>play_circle</mat-icon> NOW CONSULTING
+                </div>
+                <div class="card-top">
+                  <div class="token-badge blue-badge">#{{ apt.token_number }}</div>
+                  <div class="patient-info">
+                    <div class="p-name">{{ apt.patient?.name || 'Patient' }}</div>
+                    <div class="p-time"><mat-icon class="tiny">schedule</mat-icon> {{ apt.time_slot }}</div>
+                    @if (apt.notes) {
+                      <div class="p-notes">{{ apt.notes }}</div>
+                    }
+                  </div>
+                </div>
+                <div class="card-actions">
+                  <button mat-flat-button color="primary"
+                    (click)="completeApt(apt)" [disabled]="acting()">
+                    <mat-icon>check</mat-icon> Mark Complete
+                  </button>
+                  <button mat-stroked-button color="warn"
+                    (click)="skipPatient(apt)" [disabled]="acting()">
+                    <mat-icon>skip_next</mat-icon> Skip
+                  </button>
+                </div>
+              </div>
+            }
+            @if (inProgress.length === 0) {
+              <div class="col-empty">
+                <mat-icon>arrow_back</mat-icon>
+                Click "Call Next Patient" to start a consultation
+              </div>
+            }
+          </div>
+
+          <!-- Done Column -->
+          <div class="kanban-col">
+            <div class="col-header green-header">
+              <mat-icon>check_circle</mat-icon>
+              <span>Completed</span>
+              <span class="col-count">{{ done.length }}</span>
+            </div>
+            @for (apt of done; track apt.id) {
+              <div class="patient-card done-card" [class.skipped-card]="apt.status === 'skipped'">
+                <div class="card-top">
+                  <div class="token-badge" [class.green-badge]="apt.status === 'completed'" [class.grey-badge]="apt.status === 'skipped'">
+                    #{{ apt.token_number }}
+                  </div>
+                  <div class="patient-info">
+                    <div class="p-name">{{ apt.patient?.name || 'Patient' }}</div>
+                    <div class="p-time"><mat-icon class="tiny">schedule</mat-icon> {{ apt.time_slot }}</div>
+                  </div>
+                  <mat-icon class="done-icon" [style.color]="statusColor(apt.status)">
+                    {{ apt.status === 'completed' ? 'check_circle' : 'skip_next' }}
+                  </mat-icon>
+                </div>
+              </div>
+            }
+            @if (done.length === 0) {
+              <div class="col-empty">No completed consultations yet</div>
+            }
+          </div>
+
+        </div>
+      }
+    }
+  }
+</div>

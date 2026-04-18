@@ -1,0 +1,17 @@
+.page-container { padding: 24px; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: #1565c0; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.page-title mat-icon { font-size: 2rem; height: 2rem; width: 2rem; }
+.page-subtitle { color: #666; margin: 0; }
+.loading-center { display: flex; justify-content: center; padding: 80px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+.report-card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); border-left: 4px solid #4caf50; }
+.report-card.abnormal { border-left-color: #ff9800; }
+.report-card.critical { border-left-color: #f44336; }
+.report-avatar { display: flex; align-items: center; justify-content: center; color: white; mat-icon { color: white; } }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-bottom: 12px; }
+.findings-block, .interpretation-block { margin-top: 12px; padding: 10px; background: #f5f5f5; border-radius: 8px; font-size: 0.9rem; }
+.findings-block p, .interpretation-block p { margin: 4px 0 0; color: #444; }
+.tiny-icon { font-size: 1rem; height: 1rem; width: 1rem; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 24px; color: #aaa; text-align: center; }
+.empty-icon { font-size: 5rem; height: 5rem; width: 5rem; color: #ddd; margin-bottom: 16px; }
