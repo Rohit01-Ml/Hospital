@@ -76,7 +76,8 @@ export class DoctorQueueComponent implements OnInit, OnDestroy {
     const doctorId = this.auth.user()?.doctor_id;
     if (!doctorId) return;
     this.wsStatus.set('connecting');
-    this.ws = new WebSocket(`ws://localhost:8000/ws/queue/${doctorId}`);
+    const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+    this.ws = new WebSocket(`${wsProto}://${location.host}/ws/queue/${doctorId}`);
     this.ws.onopen    = () => this.wsStatus.set('connected');
     this.ws.onmessage = (e) => {
       try {

@@ -6,7 +6,7 @@ import { AuthResponse, User } from '../../shared/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = 'http://localhost:8000';
+  private readonly API = '/api';
   private _user = signal<User | null>(this.loadUser());
   readonly user      = this._user.asReadonly();
   readonly isLoggedIn      = computed(() => !!this._user());

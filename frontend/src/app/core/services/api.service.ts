@@ -11,7 +11,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly BASE = 'http://localhost:8000';
+  private readonly BASE = '/api';
   constructor(private http: HttpClient) {}
 
   // ── Specializations ──────────────────────────────────────────────────────────
