@@ -20,11 +20,9 @@ export class DoctorLayoutComponent implements OnInit {
   waitingCount = signal(0);
 
   navItems = [
-    { label: 'Dashboard',     icon: 'dashboard',       route: '/doctor/dashboard',     badge: false },
-    { label: 'My Queue',      icon: 'queue',            route: '/doctor/queue',          badge: true  },
-    { label: 'Appointments',  icon: 'calendar_today',  route: '/doctor/appointments',   badge: false },
-    { label: 'Prescriptions', icon: 'description',     route: '/doctor/prescriptions',  badge: false },
-    { label: 'My Patients',   icon: 'people',          route: '/doctor/patients',       badge: false },
+    { label: 'Dashboard',   icon: 'dashboard', route: '/doctor/dashboard', badge: false },
+    { label: 'My Queue',    icon: 'queue',     route: '/doctor/queue',     badge: true  },
+    { label: 'My Patients', icon: 'people',    route: '/doctor/patients',  badge: false },
   ];
 
   ngOnInit() { this.loadQueue(); }

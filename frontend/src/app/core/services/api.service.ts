@@ -129,6 +129,7 @@ export class ApiService {
   getDoctorMe(): Observable<any> { return this.http.get(`${this.BASE}/doctor/me`); }
   getDoctorAppointments(): Observable<Appointment[]> { return this.http.get<Appointment[]>(`${this.BASE}/doctor/appointments`); }
   getDoctorTodayAppointments(): Observable<Appointment[]> { return this.http.get<Appointment[]>(`${this.BASE}/doctor/appointments/today`); }
+  getDoctorAppointmentsRange(): Observable<Appointment[]> { return this.http.get<Appointment[]>(`${this.BASE}/doctor/appointments/range`); }
   getDoctorQueue(): Observable<DoctorQueueStatus> { return this.http.get<DoctorQueueStatus>(`${this.BASE}/doctor/queue`); }
   startPatient(aptId: string): Observable<any> { return this.http.post(`${this.BASE}/doctor/appointments/${aptId}/start`, {}); }
   completePatient(aptId: string): Observable<any> { return this.http.post(`${this.BASE}/doctor/appointments/${aptId}/complete`, {}); }

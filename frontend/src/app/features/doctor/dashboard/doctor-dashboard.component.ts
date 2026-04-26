@@ -11,6 +11,7 @@ import { forkJoin } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Appointment, DoctorQueueStatus } from '../../../shared/models/models';
+// allApts removed — Total Appointments and Prescriptions stats removed per spec
 
 @Component({
   selector: 'app-doctor-dashboard',
@@ -26,7 +27,6 @@ export class DoctorDashboardComponent implements OnInit {
   loading   = signal(true);
   queue     = signal<DoctorQueueStatus | null>(null);
   todayApts = signal<Appointment[]>([]);
-  allApts   = signal<Appointment[]>([]);
   doctorInfo = signal<any>(null);
   today = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -35,13 +35,11 @@ export class DoctorDashboardComponent implements OnInit {
       me: this.api.getDoctorMe(),
       queue: this.api.getDoctorQueue(),
       today: this.api.getDoctorTodayAppointments(),
-      all: this.api.getDoctorAppointments(),
     }).subscribe({
-      next: ({ me, queue, today, all }) => {
+      next: ({ me, queue, today }) => {
         this.doctorInfo.set(me);
         this.queue.set(queue);
         this.todayApts.set(today);
-        this.allApts.set(all);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -50,14 +48,11 @@ export class DoctorDashboardComponent implements OnInit {
 
   get stats() {
     const q = this.queue();
-    const all = this.allApts();
     return [
-      { label: "Today's Patients",  value: q?.total_patients || 0, icon: 'people',       color: '#1565c0', route: '/doctor/queue' },
-      { label: 'Waiting',           value: q?.waiting || 0,        icon: 'hourglass_empty', color: '#f57c00', route: '/doctor/queue' },
-      { label: 'In Progress',       value: q?.in_progress || 0,   icon: 'medical_services', color: '#7b1fa2', route: '/doctor/queue' },
-      { label: 'Completed Today',   value: q?.completed || 0,     icon: 'check_circle',  color: '#2e7d32', route: '/doctor/appointments' },
-      { label: 'Total Appointments',value: all.length,             icon: 'calendar_today', color: '#0097a7', route: '/doctor/appointments' },
-      { label: 'Prescriptions',     value: 0,                      icon: 'description',   color: '#c62828', route: '/doctor/prescriptions' },
+      { label: "Today's Patients", value: q?.total_patients || 0, icon: 'people',          color: '#1565c0', route: '/doctor/queue' },
+      { label: 'Waiting',          value: q?.waiting || 0,        icon: 'hourglass_empty', color: '#f57c00', route: '/doctor/queue' },
+      { label: 'In Progress',      value: q?.in_progress || 0,   icon: 'medical_services', color: '#7b1fa2', route: '/doctor/queue' },
+      { label: 'Completed Today',  value: q?.completed || 0,     icon: 'check_circle',     color: '#2e7d32', route: '/doctor/queue' },
     ];
   }
 

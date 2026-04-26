@@ -131,10 +131,11 @@ export class DoctorQueueComponent implements OnInit, OnDestroy {
     };
 
     this.api.prescribeAndComplete(apt.id, payload).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.saving.set(false);
-        this.prescribeApt.set(null);
         this.snack.open('✓ Prescription issued & consultation complete', '', { duration: 3000, panelClass: 'snack-success' });
+        this._printPrescription(res?.prescription, apt, payload);
+        this.prescribeApt.set(null);
         this.loadQueue();
       },
       error: () => {
@@ -142,6 +143,44 @@ export class DoctorQueueComponent implements OnInit, OnDestroy {
         this.snack.open('Failed to issue prescription', '', { duration: 3000 });
       }
     });
+  }
+
+  _printPrescription(presc: any, apt: any, payload: any) {
+    const win = window.open('', '_blank', 'width=800,height=600');
+    if (!win) return;
+    const meds = (payload.medicines || []).map((m: any) =>
+      `<tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td><td>${m.duration}</td><td>${m.instructions || '-'}</td></tr>`
+    ).join('');
+    win.document.write(`
+      <html><head><title>Prescription</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:32px;color:#111}
+        h2{color:#1565c0}h3{margin-top:24px}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
+        th{background:#1565c0;color:white;padding:8px;text-align:left}
+        td{padding:8px;border-bottom:1px solid #ddd}
+        .row{display:flex;gap:32px;margin:8px 0}.label{font-weight:bold;color:#555}
+        @media print{button{display:none}}
+      </style></head><body>
+      <h2>Prescription</h2>
+      <div class="row">
+        <span><span class="label">Patient:</span> ${apt.patient?.name || ''}</span>
+        <span><span class="label">Patient ID:</span> ${apt.patient_id}</span>
+        <span><span class="label">Token:</span> #${apt.token_number}</span>
+        <span><span class="label">Date:</span> ${new Date().toLocaleDateString()}</span>
+      </div>
+      <div class="row"><span><span class="label">Diagnosis:</span> ${payload.diagnosis}</span></div>
+      <h3>Medicines</h3>
+      <table><thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+      <tbody>${meds}</tbody></table>
+      ${payload.notes ? `<h3>Notes</h3><p>${payload.notes}</p>` : ''}
+      ${payload.follow_up_date ? `<p><span class="label">Follow-up:</span> ${payload.follow_up_date}</p>` : ''}
+      <br><button onclick="window.print()">Print</button>
+      </body></html>
+    `);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
   }
 
   skip(apt: Appointment) {

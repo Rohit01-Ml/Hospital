@@ -2,14 +2,14 @@
   <div class="page-header">
     <div>
       <h1 class="page-title"><mat-icon>people</mat-icon> My Patients</h1>
-      <p class="page-subtitle">{{ patients().length }} patients treated</p>
+      <p class="page-subtitle">{{ patients().length }} patients in history</p>
     </div>
   </div>
 
   <div class="search-bar">
     <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Search patients</mat-label>
-      <input matInput [(ngModel)]="search" placeholder="Name or email...">
+      <mat-label>Search by name, email or Patient ID</mat-label>
+      <input matInput [(ngModel)]="search" placeholder="Search...">
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
   </div>
@@ -22,22 +22,106 @@
       <h3>No patients found</h3>
     </div>
   } @else {
-    <div class="patients-grid">
-      @for (p of filtered(); track p.id) {
-        <mat-card class="patient-card">
-          <div class="pat-avatar">{{ p.name[0] }}</div>
-          <div class="pat-info">
-            <div class="pat-name">{{ p.name }}</div>
-            <div class="pat-email">{{ p.email }}</div>
-            <div class="pat-meta">
-              <span><mat-icon class="tiny-icon">event</mat-icon> {{ p.total_visits }} visit{{ p.total_visits !== 1 ? 's' : '' }}</span>
-              @if (p.last_visit) {
-                <span><mat-icon class="tiny-icon">schedule</mat-icon> Last: {{ p.last_visit | date:'mediumDate' }}</span>
-              }
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="filtered()" matSort (matSortChange)="onSort($event)" class="full-table">
+
+        <!-- Patient ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Patient ID</th>
+          <td mat-cell *matCellDef="let p">
+            <span class="pid-badge">{{ p.id }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Name -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let p">
+            <div class="name-cell">
+              <div class="mini-avatar">{{ p.name[0] }}</div>
+              <span>{{ p.name }}</span>
             </div>
-          </div>
-        </mat-card>
+          </td>
+        </ng-container>
+
+        <!-- Email -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let p">{{ p.email }}</td>
+        </ng-container>
+
+        <!-- Visits -->
+        <ng-container matColumnDef="total_visits">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Visits</th>
+          <td mat-cell *matCellDef="let p">{{ p.total_visits }}</td>
+        </ng-container>
+
+        <!-- Last Visit -->
+        <ng-container matColumnDef="last_visit">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Visit</th>
+          <td mat-cell *matCellDef="let p">{{ p.last_visit | date:'mediumDate' }}</td>
+        </ng-container>
+
+        <!-- Prescriptions -->
+        <ng-container matColumnDef="prescriptions">
+          <th mat-header-cell *matHeaderCellDef>Prescriptions</th>
+          <td mat-cell *matCellDef="let p">
+            @if (p.prescriptions?.length) {
+              <button mat-stroked-button (click)="toggleExpand(p.id)" class="rx-toggle-btn">
+                <mat-icon>description</mat-icon>
+                {{ p.prescriptions.length }} prescription{{ p.prescriptions.length > 1 ? 's' : '' }}
+              </button>
+            } @else {
+              <span class="no-rx">None</span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+      </table>
+    </mat-card>
+
+    <!-- Expanded Prescription Section -->
+    @if (expandedPatient) {
+      @for (p of filtered(); track p.id) {
+        @if (p.id === expandedPatient && p.prescriptions?.length) {
+          <mat-card class="rx-expand-card">
+            <div class="rx-expand-header">
+              <h3><mat-icon>description</mat-icon> Prescriptions for {{ p.name }}</h3>
+              <button mat-icon-button (click)="toggleExpand(p.id)"><mat-icon>close</mat-icon></button>
+            </div>
+            @for (rx of p.prescriptions; track rx.id) {
+              <div class="rx-item">
+                <div class="rx-top">
+                  <div>
+                    <div class="rx-diagnosis">{{ rx.diagnosis }}</div>
+                    <div class="rx-meta">{{ rx.created_at | date:'mediumDate' }}
+                      @if (rx.follow_up_date) {
+                        &bull; Follow-up: {{ rx.follow_up_date | date:'mediumDate' }}
+                      }
+                    </div>
+                  </div>
+                  <button mat-stroked-button (click)="printPrescription(rx)" matTooltip="Print / Download">
+                    <mat-icon>print</mat-icon> Print
+                  </button>
+                </div>
+                @if (rx.medicines?.length) {
+                  <div class="med-chips">
+                    @for (m of rx.medicines; track m.name) {
+                      <mat-chip>{{ m.name }} {{ m.dosage }}</mat-chip>
+                    }
+                  </div>
+                }
+                @if (rx.notes) {
+                  <div class="rx-notes">{{ rx.notes }}</div>
+                }
+              </div>
+            }
+          </mat-card>
+        }
       }
-    </div>
+    }
   }
 </div>
